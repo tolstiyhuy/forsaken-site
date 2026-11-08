@@ -291,6 +291,34 @@
 
   const isLoreItemOpen = (item) => (item.doc ? isLoreDocUnlocked(item.doc) : false);
 
+  const LORE_PAGE_KEY = "forsaken-lore-pages";
+  let lorePages = {};
+  try {
+    const savedPages = JSON.parse(localStorage.getItem(LORE_PAGE_KEY) || "{}");
+    if (savedPages && typeof savedPages === "object") lorePages = savedPages;
+  } catch (err) {
+    /* localStorage может быть недоступен */
+  }
+
+  const lorePageMax = (key) => (Number.isFinite(lorePages[key]) ? lorePages[key] : 0);
+
+  const saveLorePages = () => {
+    try {
+      localStorage.setItem(LORE_PAGE_KEY, JSON.stringify(lorePages));
+    } catch (err) {
+      /* игнорируем запрет на запись */
+    }
+  };
+
+  const unlockLorePage = (key, index) => {
+    if (index <= lorePageMax(key)) return;
+    lorePages[key] = index;
+    saveLorePages();
+  };
+
+  const loreView = { doc: null, index: 0, total: 0, atEnd: false, secondsLeft: 0 };
+  let loreTimerId = null;
+
   const LORE_ARCHIVE = [
     { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", doc: "chronos", cat: "characters", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
     { id: "twotime", name: "Two Time", role: "SURVIVOR", file: "LR-002", cat: "characters", teaser: "Культист, чья вера стоила Azure жизни." },
@@ -403,6 +431,7 @@
     grid.innerHTML = LORE_ARCHIVE.filter((item) => item.cat === currentLoreCat)
       .map(loreFileHTML)
       .join("");
+    observeReveals();
   };
 
   const setLoreCat = (cat, { loadDoc = false } = {}) => {
@@ -486,39 +515,135 @@
   let loreProgressBound = false;
 
   const updateLoreProgress = () => {
-    const article = $("#lore-article");
     const bar = $("#lore-progress");
     const label = $("#lore-progress-label");
-    if (!article || !bar || !label || !article.offsetHeight) return;
+    if (!bar || !label) return;
 
-    const start = window.scrollY + article.getBoundingClientRect().top;
-    const span = Math.max(1, article.offsetHeight - window.innerHeight * 0.35);
-    const raw = (window.scrollY + window.innerHeight * 0.3 - start) / span;
-    const pct = Math.max(0, Math.min(100, Math.round(raw * 100)));
+    if (!loreView.doc || !loreView.total) {
+      bar.style.width = "0%";
+      label.textContent = "00 / 00";
+      return;
+    }
+
+    const pct = Math.round(((loreView.index + 1) / loreView.total) * 100);
     bar.style.width = pct + "%";
-    label.textContent = pct + "%";
+    label.textContent = `${String(loreView.index + 1).padStart(2, "0")} / ${String(loreView.total).padStart(2, "0")}`;
 
-    if (pct >= 95 && currentLoreDoc) markLoreRead(currentLoreDoc);
-
-    const marker = window.scrollY + 150;
-    let active = null;
-    $$(".lore-chapter", article).forEach((ch) => {
-      if (ch.getBoundingClientRect().top + window.scrollY <= marker) active = ch;
-    });
-    $$("#lore-toc-links a").forEach((a) => {
-      a.classList.toggle("is-active", !!active && a.dataset.loreChapter === active.dataset.chapter);
+    const max = isLoreRead(loreView.doc) ? loreView.total - 1 : lorePageMax(loreView.doc);
+    $$("#lore-toc-links a").forEach((a, i) => {
+      a.classList.toggle("is-active", i === loreView.index);
+      a.classList.toggle("is-locked", i > max);
     });
   };
 
   const initLoreProgress = () => {
     if (loreProgressBound) return;
     loreProgressBound = true;
-    window.addEventListener("scroll", updateLoreProgress, { passive: true });
-    window.addEventListener("resize", updateLoreProgress);
+    const onViewportChange = () => {
+      updateLoreProgress();
+      checkLoreChapterEnd();
+    };
+    window.addEventListener("scroll", onViewportChange, { passive: true });
+    window.addEventListener("resize", onViewportChange);
     updateLoreProgress();
   };
 
   const loreCache = {};
+
+  const loreChapterSeconds = (chapter) => {
+    const words = chapter.paras.join(" ").trim().split(/\s+/).filter(Boolean).length;
+    return Math.min(35, Math.max(8, Math.round(words / 4)));
+  };
+
+  const checkLoreChapterEnd = () => {
+    if (!loreView.doc) return;
+    const el = document.querySelector("#lore-content .lore-chapter:not([hidden])");
+    if (!el) return;
+    if (el.getBoundingClientRect().bottom <= window.innerHeight - 60 && !loreView.atEnd) {
+      loreView.atEnd = true;
+      updateLorePager();
+    }
+  };
+
+  const updateLorePager = () => {
+    const next = $("#lore-next");
+    const prev = $("#lore-prev");
+    const num = $("#lore-page-num");
+    const totalEl = $("#lore-page-total");
+    const hint = $("#lore-pager-hint");
+    if (!next || !prev || !num || !totalEl || !loreView.doc) return;
+
+    const last = loreView.index === loreView.total - 1;
+    const read = isLoreRead(loreView.doc);
+
+    next.textContent = last ? (read ? "Досье прочитано" : "Завершить досье") : "Далее →";
+    next.disabled = (last && read) || loreView.secondsLeft > 0 || !loreView.atEnd;
+    prev.disabled = loreView.index === 0;
+    num.textContent = String(loreView.index + 1).padStart(2, "0");
+    totalEl.textContent = String(loreView.total).padStart(2, "0");
+
+    if (last && read) {
+      hint.hidden = true;
+      return;
+    }
+    if (!loreView.atEnd) {
+      hint.hidden = false;
+      hint.textContent = "Дочитай главу до конца — дальше пока не пускает.";
+    } else if (loreView.secondsLeft > 0) {
+      hint.hidden = false;
+      hint.textContent = `Ещё ${loreView.secondsLeft} с. Архив не любит спешки.`;
+    } else {
+      hint.hidden = true;
+    }
+  };
+
+  const startLoreChapterTimer = (key, index) => {
+    clearInterval(loreTimerId);
+    loreTimerId = null;
+    const chapter = loreCache[key]?.chapters[index];
+    const already = isLoreRead(key) || index < lorePageMax(key);
+    const seconds = already || !chapter ? 0 : loreChapterSeconds(chapter);
+    const readyAt = Date.now() + seconds * 1000;
+
+    const tick = () => {
+      loreView.secondsLeft = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
+      updateLorePager();
+      if (loreView.secondsLeft === 0 && loreTimerId) {
+        clearInterval(loreTimerId);
+        loreTimerId = null;
+      }
+    };
+
+    tick();
+    if (seconds > 0) loreTimerId = setInterval(tick, 1000);
+  };
+
+  const showLoreChapter = (key, index, { scroll = false } = {}) => {
+    const cached = loreCache[key];
+    if (!cached) return;
+    const total = cached.chapters.length;
+    const max = isLoreRead(key) ? total - 1 : Math.min(lorePageMax(key), total - 1);
+    const target = Math.max(0, Math.min(index, max));
+
+    $$("#lore-content .lore-chapter").forEach((el, i) => {
+      el.hidden = i !== target;
+    });
+
+    loreView.doc = key;
+    loreView.index = target;
+    loreView.total = total;
+    loreView.atEnd = false;
+    loreView.secondsLeft = 0;
+
+    startLoreChapterTimer(key, target);
+    updateLoreProgress();
+    updateLorePager();
+
+    requestAnimationFrame(() => {
+      checkLoreChapterEnd();
+      if (scroll) scrollToLoreReader();
+    });
+  };
 
   const paintLoreChrome = (doc) => {
     const fileEl = $("#lore-article-file");
@@ -541,26 +666,12 @@
     }
   };
 
-  let loreFootObserver = null;
-  const bindLoreCompletion = () => {
-    loreFootObserver?.disconnect();
-    const foot = $("#lore-article-foot");
-    if (!foot || !("IntersectionObserver" in window)) return;
-    loreFootObserver = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting) && currentLoreDoc) {
-          markLoreRead(currentLoreDoc);
-        }
-      },
-      { threshold: 0.75 }
-    );
-    loreFootObserver.observe(foot);
-  };
-
   const markLoreRead = (key) => {
     if (!key || loreRead.has(key) || !loreCache[key]) return;
     loreRead.add(key);
+    lorePages[key] = loreCache[key].chapters.length - 1;
     saveLoreRead();
+    saveLorePages();
     updateLoreAccess();
 
     const unlocked = Object.keys(LORE_GATES).filter(
@@ -586,10 +697,23 @@
     const toc = $("#lore-toc-links");
     if (toc) toc.innerHTML = `<span class="lore-toc__empty">СОДЕРЖАНИЕ ЗАСЕКРЕЧЕНО</span>`;
 
+    clearInterval(loreTimerId);
+    loreTimerId = null;
+    loreView.doc = null;
+    loreView.index = 0;
+    loreView.total = 0;
+    loreView.atEnd = false;
+    loreView.secondsLeft = 0;
+
+    const pager = $("#lore-pager");
+    if (pager) pager.hidden = true;
+    const hint = $("#lore-pager-hint");
+    if (hint) hint.hidden = true;
+
     const bar = $("#lore-progress");
     if (bar) bar.style.width = "0%";
     const label = $("#lore-progress-label");
-    if (label) label.textContent = "0%";
+    if (label) label.textContent = "00 / 00";
     const foot = $("#lore-article-foot");
     if (foot) foot.textContent = "Запись закрыта до прочтения предыдущего досье.";
 
@@ -601,8 +725,6 @@
         <p>Архив открывает записи по очереди. Сначала прочитай досье «${req ? req.name : "предыдущая запись"}» до конца — тогда следующая запись станет доступна.</p>
         ${req ? `<button class="btn btn--primary" type="button" data-lore-read="${gate.requires}"><span>Читать «${req.name}»</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></button>` : ""}
       </div>`;
-
-    bindLoreCompletion();
   };
 
   const requestLoreDoc = (key) => {
@@ -649,18 +771,19 @@
       const cached = loreCache[key];
       if (!cached) return;
       content.innerHTML = cached.html;
+      const max = isLoreRead(key) ? cached.chapters.length - 1 : lorePageMax(key);
       const toc = $("#lore-toc-links");
       if (toc) {
         toc.innerHTML = cached.chapters
           .map(
             (ch, i) =>
-              `<a href="#lore-ch-${ch.id}" data-lore-chapter="${ch.id}"><span>${String(i + 1).padStart(2, "0")}</span>${ch.title}</a>`
+              `<a href="#lore-ch-${ch.id}" data-lore-chapter="${ch.id}" class="${i > max ? "is-locked" : ""}"><span>${String(i + 1).padStart(2, "0")}</span>${ch.title}</a>`
           )
           .join("");
       }
-      bindLoreCompletion();
-      requestAnimationFrame(updateLoreProgress);
-      if (scroll) scrollToLoreReader();
+      const pager = $("#lore-pager");
+      if (pager) pager.hidden = false;
+      showLoreChapter(key, isLoreRead(key) ? 0 : lorePageMax(key), { scroll });
     };
 
     if (loreCache[key]) {
@@ -717,12 +840,36 @@
     const toc = $("#lore-toc-links");
     toc?.addEventListener("click", (e) => {
       const link = e.target.closest("a[data-lore-chapter]");
-      if (!link) return;
+      if (!link || !currentLoreDoc) return;
       e.preventDefault();
-      const target = document.getElementById("lore-ch-" + link.dataset.loreChapter);
-      if (!target) return;
-      const top = window.scrollY + target.getBoundingClientRect().top - 96;
-      window.scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
+      const cached = loreCache[currentLoreDoc];
+      if (!cached) return;
+      const index = cached.chapters.findIndex((ch) => ch.id === link.dataset.loreChapter);
+      if (index < 0) return;
+      const max = isLoreRead(currentLoreDoc) ? cached.chapters.length - 1 : lorePageMax(currentLoreDoc);
+      if (index > max) {
+        showLoreToast("ГЛАВА ЕЩЁ ЗАКРЫТА · Дочитай текущую");
+        return;
+      }
+      showLoreChapter(currentLoreDoc, index, { scroll: true });
+    });
+
+    $("#lore-next")?.addEventListener("click", () => {
+      const next = $("#lore-next");
+      if (!loreView.doc || !next || next.disabled) return;
+      const key = loreView.doc;
+      if (loreView.index >= loreView.total - 1) {
+        markLoreRead(key);
+        updateLorePager();
+        return;
+      }
+      unlockLorePage(key, loreView.index + 1);
+      showLoreChapter(key, loreView.index + 1, { scroll: true });
+    });
+
+    $("#lore-prev")?.addEventListener("click", () => {
+      if (!loreView.doc || loreView.index === 0) return;
+      showLoreChapter(loreView.doc, loreView.index - 1, { scroll: true });
     });
 
     const archive = $("#lore-archive");

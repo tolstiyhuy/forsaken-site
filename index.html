@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body class="is-loading">
 
@@ -891,6 +891,13 @@
                 </div>
               </div>
 
+              <div class="lore-pager" id="lore-pager" hidden>
+                <button class="lore-pager__btn" type="button" id="lore-prev">← Назад</button>
+                <span class="lore-pager__status"><b id="lore-page-num">01</b> / <span id="lore-page-total">13</span></span>
+                <button class="lore-pager__btn lore-pager__btn--next" type="button" id="lore-next">Далее →</button>
+              </div>
+              <p class="lore-pager__hint" id="lore-pager-hint" hidden></p>
+
               <footer class="lore-article__foot">
                 <div>
                   <span>КОНЕЦ ЗАПИСИ</span>
@@ -1204,8 +1211,8 @@
     </div>
   </div>
 
-  <script src="js/data.js?v=4"></script>
-  <script src="js/details.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/data.js?v=5"></script>
+  <script src="js/details.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
