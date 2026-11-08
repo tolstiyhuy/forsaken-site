@@ -5026,6 +5026,23 @@ kbd {
   color: var(--dim);
 }
 
+.lore-article__download {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 5px 8px;
+  border: 1px solid var(--line-soft);
+  font-family: var(--font-mono);
+  font-size: 6.8px;
+  letter-spacing: 0.14em;
+  color: var(--dim);
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.lore-article__download:hover {
+  border-color: var(--line);
+  color: var(--gold);
+}
+
 .lore-chapter {
   padding-top: 38px;
 }

@@ -217,8 +217,47 @@
 
   /* ---------- lore ---------- */
 
+  const LORE_DOCS = {
+    chronos: {
+      file: "lore/chronos.md",
+      name: "Хронос",
+      sub: "Он и есть та самая лишняя секунда.",
+      fileLabel: "ЛОР-ДОСЬЕ // LR-001",
+      meta: ["13 ГЛАВ", "≈ 25 МИН ЧТЕНИЯ", "СПОЙЛЕРЫ"],
+      foot: "Долг всё ещё не закрыт.",
+      tocFoot: "ХРОНОС · LR-001",
+      download: "Chronos_lore_final.md",
+      chapters: [
+        { id: "mir", kicker: "ПРОЛОГ", title: "Мир на секундах", from: 1, to: 2 },
+        { id: "obryad", kicker: "ГЛАВА 02", title: "Обряд на поле", from: 3, to: 8 },
+        { id: "rozhdenie", kicker: "ГЛАВА 03", title: "Лишняя секунда", from: 9, to: 13 },
+        { id: "zakon", kicker: "ГЛАВА 04", title: "Закон долга", from: 14, to: 23 },
+        { id: "oblik", kicker: "ГЛАВА 05", title: "Человек с циферблатом", from: 24, to: 30 },
+        { id: "ohota", kicker: "ГЛАВА 06", title: "Сверхурочные", from: 31, to: 41 },
+        { id: "legendy", kicker: "ГЛАВА 07", title: "Что говорят выжившие", from: 42, to: 44 },
+        { id: "twotime", kicker: "ГЛАВА 08", title: "Долг, который не закрыть", from: 45, to: 54 },
+        { id: "spektr", kicker: "ГЛАВА 09", title: "Хозяин игр", from: 55, to: 56 },
+        { id: "johndoe", kicker: "ГЛАВА 10", title: "Первый носитель", from: 57, to: 60 },
+        { id: "chetvertye", kicker: "ГЛАВА 11", title: "Четыре единицы", from: 61, to: 66 },
+        { id: "slasher", kicker: "ГЛАВА 12", title: "Те, кто платят вперёд", from: 67, to: 78 },
+        { id: "tishina", kicker: "ЭПИЛОГ", title: "Тишина без тика", from: 79, to: 89 }
+      ]
+    },
+    place: {
+      file: "lore/place.md",
+      name: "Место",
+      sub: "Вечный ад — это не мир. Это счёт, который ведут.",
+      fileLabel: "ЛОР-ДОСЬЕ // LR-000",
+      meta: ["9 ГЛАВ", "≈ 18 МИН ЧТЕНИЯ", "СПОЙЛЕРЫ"],
+      foot: "Счёт всё ещё открыт.",
+      tocFoot: "МЕСТО · LR-000",
+      download: "Place_lore_final.md"
+    }
+  };
+
   const LORE_ARCHIVE = [
-    { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
+    { id: "place", name: "Место", role: "PLACE", file: "LR-000", doc: "place", open: true, img: "assets/maps/crossroads.jpg", teaser: "Вечный ад. То, из чего собраны все карты, и то, что собирает с них долг." },
+    { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", doc: "chronos", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
     { id: "twotime", name: "Two Time", role: "SURVIVOR", file: "LR-002", teaser: "Культист, чья вера стоила Azure жизни." },
     { id: "johndoe", name: "John Doe", role: "KILLER", file: "LR-003", teaser: "Первый носитель кода." },
     { id: "shedletsky", name: "Shedletsky", role: "SURVIVOR", file: "LR-004", teaser: "Тот, кто протянул куриную ножку." },
@@ -230,30 +269,56 @@
     { id: "adminjohndoe", name: "Admin John Doe", role: "KILLER", file: "LR-010", teaser: "Истинный испорченный код." }
   ];
 
-  const LORE_CHAPTERS = [
-    { id: "mir", kicker: "ПРОЛОГ", title: "Мир на секундах", from: 1, to: 2 },
-    { id: "obryad", kicker: "ГЛАВА 02", title: "Обряд на поле", from: 3, to: 8 },
-    { id: "rozhdenie", kicker: "ГЛАВА 03", title: "Лишняя секунда", from: 9, to: 13 },
-    { id: "zakon", kicker: "ГЛАВА 04", title: "Закон долга", from: 14, to: 23 },
-    { id: "oblik", kicker: "ГЛАВА 05", title: "Человек с циферблатом", from: 24, to: 30 },
-    { id: "ohota", kicker: "ГЛАВА 06", title: "Сверхурочные", from: 31, to: 41 },
-    { id: "legendy", kicker: "ГЛАВА 07", title: "Что говорят выжившие", from: 42, to: 44 },
-    { id: "twotime", kicker: "ГЛАВА 08", title: "Долг, который не закрыть", from: 45, to: 54 },
-    { id: "spektr", kicker: "ГЛАВА 09", title: "Хозяин игр", from: 55, to: 56 },
-    { id: "johndoe", kicker: "ГЛАВА 10", title: "Первый носитель", from: 57, to: 60 },
-    { id: "chetvertye", kicker: "ГЛАВА 11", title: "Четыре единицы", from: 61, to: 66 },
-    { id: "slasher", kicker: "ГЛАВА 12", title: "Те, кто платят вперёд", from: 67, to: 78 },
-    { id: "tishina", kicker: "ЭПИЛОГ", title: "Тишина без тика", from: 79, to: 89 }
-  ];
-
   const escapeHTML = (text) =>
     text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const inlineLore = (text) => escapeHTML(text).replace(/\*([^*]+)\*/g, "<em>$1</em>");
 
+  const parseLoreText = (text, doc) => {
+    if (doc.chapters) {
+      const paras = text.split(/\r?\n\s*\r?\n/).map((p) => p.trim()).filter(Boolean);
+      return doc.chapters.map((ch) => ({
+        ...ch,
+        paras: paras.slice(ch.from, ch.to + 1)
+      }));
+    }
+
+    const parts = text.split(/\r?\n?<!--\s*ch\s+([^>]+?)\s*-->\r?\n?/g);
+    const chapters = [];
+    for (let i = 1; i < parts.length; i += 2) {
+      const [id, kicker, title] = parts[i].split("|").map((s) => s.trim());
+      const paras = parts[i + 1]
+        .split(/\r?\n\s*\r?\n/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+      chapters.push({ id, kicker, title, paras });
+    }
+    return chapters;
+  };
+
+  const loreChaptersHTML = (chapters) =>
+    chapters
+      .map((ch, i) => {
+        const body = ch.paras.map((p) => `<p>${inlineLore(p)}</p>`).join("");
+        return `
+            <section class="lore-chapter" id="lore-ch-${ch.id}" data-chapter="${ch.id}">
+              <header class="lore-chapter__head">
+                <span class="lore-chapter__num">${String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <span class="lore-chapter__kicker">${ch.kicker}</span>
+                  <h3>${ch.title}</h3>
+                </div>
+              </header>
+              <div class="lore-chapter__text">${body}</div>
+            </section>`;
+      })
+      .join("");
+
+  const loreLoadingHTML = `<div class="lore-loading"><i></i><span>ЗАГРУЗКА АРХИВА...</span></div>`;
+
   const loreFileHTML = (item) => {
     const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === item.id);
-    const img = char && char.img;
+    const img = item.img || (char && char.img);
     const art = img
       ? `<img src="${img}" alt="${item.name}" loading="lazy" draggable="false">`
       : `<span class="lore-file__letter">${initialOf(item.name)}</span>`;
@@ -261,7 +326,7 @@
       ? `<span class="lore-file__state">ОТКРЫТО</span>`
       : `<span class="lore-file__state lore-file__state--locked"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>ЗАСЕКРЕЧЕНО</span>`;
     return `
-      <article class="lore-file ${item.open ? "is-open" : "is-locked"} reveal" ${item.open ? `data-lore-open tabindex="0" role="button" aria-label="Читать досье: ${item.name}"` : `aria-disabled="true"`}>
+      <article class="lore-file ${item.open ? "is-open" : "is-locked"} reveal" ${item.open ? `data-lore-open="${item.doc || item.id}" tabindex="0" role="button" aria-label="Читать досье: ${item.name}"` : `aria-disabled="true"`}>
         <div class="lore-file__art">
           ${art}
           <span class="lore-file__shade"></span>
@@ -323,76 +388,115 @@
     updateLoreProgress();
   };
 
-  const initLore = () => {
-    const content = $("#lore-content");
-    if (!content) return;
-    renderLoreArchive();
+  let currentLoreDoc = null;
+  const loreCache = {};
 
-    fetch("lore/chronos.md")
+  const renderLoreDoc = (key, { scroll = false } = {}) => {
+    const doc = LORE_DOCS[key];
+    const content = $("#lore-content");
+    if (!doc || !content) return;
+
+    if (currentLoreDoc === key) {
+      if (scroll) scrollToLoreReader();
+      return;
+    }
+    currentLoreDoc = key;
+
+    const fileEl = $("#lore-article-file");
+    if (fileEl) fileEl.textContent = doc.fileLabel;
+    const titleEl = $("#lore-article-title");
+    if (titleEl) titleEl.textContent = doc.name;
+    const subEl = $("#lore-article-sub");
+    if (subEl) subEl.textContent = doc.sub;
+    const metaEl = $("#lore-article-meta");
+    if (metaEl) metaEl.innerHTML = doc.meta.map((m) => `<span>${m}</span>`).join("");
+    const footEl = $("#lore-article-foot");
+    if (footEl) footEl.textContent = doc.foot;
+    const tocFoot = $("#lore-toc-foot");
+    if (tocFoot) tocFoot.textContent = doc.tocFoot;
+    const dl = $("#lore-download");
+    if (dl) {
+      dl.href = doc.file;
+      dl.download = doc.download;
+    }
+
+    const paint = () => {
+      const cached = loreCache[key];
+      if (!cached) return;
+      content.innerHTML = cached.html;
+      const toc = $("#lore-toc-links");
+      if (toc) {
+        toc.innerHTML = cached.chapters
+          .map(
+            (ch, i) =>
+              `<a href="#lore-ch-${ch.id}" data-lore-chapter="${ch.id}"><span>${String(i + 1).padStart(2, "0")}</span>${ch.title}</a>`
+          )
+          .join("");
+      }
+      requestAnimationFrame(updateLoreProgress);
+      if (scroll) scrollToLoreReader();
+    };
+
+    if (loreCache[key]) {
+      paint();
+      return;
+    }
+
+    content.innerHTML = loreLoadingHTML;
+    fetch(doc.file)
       .then((r) => {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.text();
       })
       .then((text) => {
-        const paras = text.split(/\r?\n\s*\r?\n/).map((p) => p.trim()).filter(Boolean);
-        if (paras.length < 2) throw new Error("empty lore");
-        content.innerHTML = LORE_CHAPTERS.map((ch, i) => {
-          const body = paras
-            .slice(ch.from, ch.to + 1)
-            .map((p) => `<p>${inlineLore(p)}</p>`)
-            .join("");
-          return `
-            <section class="lore-chapter" id="lore-ch-${ch.id}" data-chapter="${ch.id}">
-              <header class="lore-chapter__head">
-                <span class="lore-chapter__num">${String(i + 1).padStart(2, "0")}</span>
-                <div>
-                  <span class="lore-chapter__kicker">${ch.kicker}</span>
-                  <h3>${ch.title}</h3>
-                </div>
-              </header>
-              <div class="lore-chapter__text">${body}</div>
-            </section>`;
-        }).join("");
-
-        const toc = $("#lore-toc-links");
-        if (toc) {
-          toc.innerHTML = LORE_CHAPTERS.map(
-            (ch, i) => `<a href="#lore-ch-${ch.id}" data-lore-chapter="${ch.id}"><span>${String(i + 1).padStart(2, "0")}</span>${ch.title}</a>`
-          ).join("");
-          toc.addEventListener("click", (e) => {
-            const link = e.target.closest("a[data-lore-chapter]");
-            if (!link) return;
-            e.preventDefault();
-            const target = document.getElementById("lore-ch-" + link.dataset.loreChapter);
-            if (!target) return;
-            const top = window.scrollY + target.getBoundingClientRect().top - 96;
-            window.scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
-          });
-        }
-
-        initLoreProgress();
-        requestAnimationFrame(updateLoreProgress);
+        const chapters = parseLoreText(text, doc);
+        if (!chapters.length || chapters.some((ch) => !ch.paras.length)) throw new Error("empty lore");
+        loreCache[key] = { chapters, html: loreChaptersHTML(chapters) };
+        if (currentLoreDoc === key) paint();
       })
       .catch(() => {
+        if (currentLoreDoc !== key) return;
+        currentLoreDoc = null;
         content.innerHTML = `
           <div class="lore-error">
             <b>Архив не загрузился.</b>
-            <p>Текст доступен по прямой ссылке: <a href="lore/chronos.md" download>Chronos_lore_final.md</a></p>
+            <p>Текст доступен по прямой ссылке: <a href="${doc.file}" download="${doc.download}">${doc.download}</a></p>
           </div>`;
       });
+  };
+
+  const initLore = () => {
+    const content = $("#lore-content");
+    if (!content) return;
+    renderLoreArchive();
+    initLoreProgress();
+    renderLoreDoc("chronos");
 
     $("#lore-read")?.addEventListener("click", scrollToLoreReader);
     $("#lore-top")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }));
 
+    const toc = $("#lore-toc-links");
+    toc?.addEventListener("click", (e) => {
+      const link = e.target.closest("a[data-lore-chapter]");
+      if (!link) return;
+      e.preventDefault();
+      const target = document.getElementById("lore-ch-" + link.dataset.loreChapter);
+      if (!target) return;
+      const top = window.scrollY + target.getBoundingClientRect().top - 96;
+      window.scrollTo({ top, behavior: reduced ? "auto" : "smooth" });
+    });
+
     const archive = $("#lore-archive");
     archive?.addEventListener("click", (e) => {
-      if (e.target.closest("[data-lore-open]")) scrollToLoreReader();
+      const card = e.target.closest("[data-lore-open]");
+      if (card) renderLoreDoc(card.dataset.loreOpen, { scroll: true });
     });
     archive?.addEventListener("keydown", (e) => {
-      if ((e.key === "Enter" || e.key === " ") && e.target.closest("[data-lore-open]")) {
-        e.preventDefault();
-        scrollToLoreReader();
-      }
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const card = e.target.closest("[data-lore-open]");
+      if (!card) return;
+      e.preventDefault();
+      renderLoreDoc(card.dataset.loreOpen, { scroll: true });
     });
   };
 
@@ -968,7 +1072,7 @@
         const map = SITE_DATA.maps.find((m) => m.id === id);
         if (map) openMap(map);
       } else if (id && tab === "lore") {
-        if (id === "chronos") scrollToLoreReader();
+        if (LORE_DOCS[id]) renderLoreDoc(id, { scroll: true });
       } else if (id) {
         const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === id);
         if (char) openModal(char);
@@ -1007,7 +1111,7 @@
         const map = SITE_DATA.maps.find((m) => m.id === id);
         if (map) setTimeout(() => openMap(map), 300);
       } else if (tab === "lore") {
-        if (id === "chronos") setTimeout(scrollToLoreReader, 300);
+        if (LORE_DOCS[id]) setTimeout(() => renderLoreDoc(id, { scroll: true }), 300);
       } else {
         const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === id);
         if (char) setTimeout(() => openModal(char), 300);

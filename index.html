@@ -743,9 +743,9 @@
           <h1 class="page-head__title" data-text="LORE">LORE</h1>
           <p class="page-head__sub">За каждым раундом стоит чей-то неоплаченный долг. Вот только один из них умеет ходить.</p>
           <div class="page-head__meta">
-            <span><b>01</b> досье открыто</span>
-            <span><b>13</b> глав</span>
-            <span><b>179</b> фрагментов</span>
+            <span><b>02</b> досье открыто</span>
+            <span><b>22</b> главы</span>
+            <span><b>346</b> фрагментов</span>
           </div>
         </div>
       </div>
@@ -758,7 +758,7 @@
               <b>ВНИМАНИЕ: СПОЙЛЕРЫ</b>
               <p>В досье раскрываются связи John Doe, Two Time, Shedletsky, Slasher и других персонажей. Если ты ещё не читал их истории — начни с досье, а не с этого архива.</p>
             </div>
-            <span class="lore-warning__tag">LR-001</span>
+            <span class="lore-warning__tag">LR-000 / LR-001</span>
           </div>
 
           <div class="lore-feature reveal" id="lore-feature">
@@ -807,19 +807,20 @@
               </div>
               <div class="lore-toc__bar"><i id="lore-progress"></i></div>
               <nav id="lore-toc-links" aria-label="Главы досье"></nav>
-              <div class="lore-toc__foot">ХРОНОС · LR-001</div>
+              <div class="lore-toc__foot" id="lore-toc-foot">ХРОНОС · LR-001</div>
             </aside>
 
             <article class="lore-article reveal" id="lore-article">
               <header class="lore-article__head">
-                <div class="lore-article__file">ЛОР-ДОСЬЕ // LR-001</div>
-                <h2>Хронос</h2>
-                <p>Он и есть та самая лишняя секунда.</p>
-                <div class="lore-article__meta">
+                <div class="lore-article__file" id="lore-article-file">ЛОР-ДОСЬЕ // LR-001</div>
+                <h2 id="lore-article-title">Хронос</h2>
+                <p id="lore-article-sub">Он и есть та самая лишняя секунда.</p>
+                <div class="lore-article__meta" id="lore-article-meta">
                   <span>13 ГЛАВ</span>
                   <span>≈ 25 МИН ЧТЕНИЯ</span>
                   <span>СПОЙЛЕРЫ</span>
                 </div>
+                <a class="lore-article__download" id="lore-download" href="lore/chronos.md" download="Chronos_lore_final.md">Скачать .md</a>
               </header>
 
               <div id="lore-content">
@@ -832,7 +833,7 @@
               <footer class="lore-article__foot">
                 <div>
                   <span>КОНЕЦ ЗАПИСИ</span>
-                  <b>Долг всё ещё не закрыт.</b>
+                  <b id="lore-article-foot">Долг всё ещё не закрыт.</b>
                 </div>
                 <button type="button" id="lore-top">↑ В начало</button>
               </footer>
@@ -923,8 +924,8 @@
           <section class="lore-archive">
             <div class="section-head reveal">
               <div class="section-head__kicker"><i></i> АРХИВ</div>
-              <h2>Остальные досье</h2>
-              <p>Записи ещё не рассекречены. Как только появится текст — он встанет на это место.</p>
+              <h2>Досье архива</h2>
+              <p>Часть записей уже рассекречена. Остальные появятся, когда архив разберут.</p>
             </div>
             <div class="lore-archive__grid" id="lore-archive"></div>
           </section>
