@@ -9,6 +9,7 @@
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = window.matchMedia("(pointer: fine)").matches;
+  const MAP_IMG_VER = "?v=2";
 
   /* ---------- helpers ---------- */
 
@@ -81,7 +82,7 @@
   const mapCardHTML = (map, i) => `
     <article class="map-card reveal" data-id="${map.id}" style="--c1:${map.c1}; --c2:${map.c2}; --accent:${map.accent}; --delay:${i * 50}ms" tabindex="0" role="button" aria-label="Открыть досье локации: ${map.name}">
       <div class="map-card__art">
-        <img class="map-card__photo" src="assets/maps/${map.id}.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()">
+        <img class="map-card__photo" src="assets/maps/${map.id}.jpg${MAP_IMG_VER}" alt="" loading="lazy" decoding="async" onerror="this.remove()">
         <div class="map-card__grid"></div>
         <span class="map-card__glyph">${map.glyph}</span>
         <span class="map-card__cross map-card__cross--tl"></span>
@@ -685,7 +686,7 @@
       photo.hidden = false;
       photo.alt = `Локация ${map.name}`;
       photo.onerror = () => { photo.hidden = true; };
-      photo.src = `assets/maps/${map.id}.jpg`;
+      photo.src = `assets/maps/${map.id}.jpg${MAP_IMG_VER}`;
     }
 
     const tag = $("#map-modal-tag", mapModal);
