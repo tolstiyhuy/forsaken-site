@@ -258,6 +258,38 @@
   };
 
   let currentLoreCat = "characters";
+  let currentLoreDoc = null;
+
+  const LORE_GATES = {
+    place: { requires: "chronos" }
+  };
+
+  const LORE_READ_KEY = "forsaken-lore-read";
+  const loreRead = new Set();
+  try {
+    const saved = JSON.parse(localStorage.getItem(LORE_READ_KEY) || "[]");
+    if (Array.isArray(saved)) saved.forEach((key) => loreRead.add(key));
+  } catch (err) {
+    /* localStorage может быть недоступен */
+  }
+
+  const saveLoreRead = () => {
+    try {
+      localStorage.setItem(LORE_READ_KEY, JSON.stringify([...loreRead]));
+    } catch (err) {
+      /* игнорируем запрет на запись */
+    }
+  };
+
+  const isLoreRead = (key) => loreRead.has(key);
+
+  const isLoreDocUnlocked = (key) => {
+    if (key === "chronos") return true;
+    const gate = LORE_GATES[key];
+    return !!gate && loreRead.has(gate.requires);
+  };
+
+  const isLoreItemOpen = (item) => (item.doc ? isLoreDocUnlocked(item.doc) : false);
 
   const LORE_ARCHIVE = [
     { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", doc: "chronos", cat: "characters", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
@@ -329,22 +361,38 @@
     const art = img
       ? `<img src="${img}" alt="${item.name}" loading="lazy" draggable="false">`
       : `<span class="lore-file__letter">${initialOf(item.name)}</span>`;
-    const lock = item.open
-      ? `<span class="lore-file__state">ОТКРЫТО</span>`
+
+    const open = isLoreItemOpen(item);
+    const gate = !open && item.doc ? LORE_GATES[item.doc] : null;
+    const read = item.doc && isLoreRead(item.doc);
+    const state = open
+      ? `<span class="lore-file__state">${read ? "ПРОЧИТАНО" : "ОТКРЫТО"}</span>`
       : `<span class="lore-file__state lore-file__state--locked"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>ЗАСЕКРЕЧЕНО</span>`;
+    const stateText = open
+      ? "Читать досье →"
+      : gate
+        ? `Откроется после «${LORE_DOCS[gate.requires].name}»`
+        : "ЛОР ГОТОВИТСЯ";
+    const attrs = open
+      ? `data-lore-open="${item.doc || item.id}" tabindex="0" role="button" aria-label="Читать досье: ${item.name}"`
+      : gate
+        ? `data-lore-gate="${item.doc}" tabindex="0" role="button" aria-label="Досье закрыто. Сначала прочитай ${LORE_DOCS[gate.requires].name}"`
+        : `aria-disabled="true"`;
+    const cls = open ? "is-open" : gate ? "is-locked is-gated" : "is-locked";
+
     return `
-      <article class="lore-file ${item.open ? "is-open" : "is-locked"} reveal" ${item.open ? `data-lore-open="${item.doc || item.id}" tabindex="0" role="button" aria-label="Читать досье: ${item.name}"` : `aria-disabled="true"`}>
+      <article class="lore-file ${cls} reveal" ${attrs}>
         <div class="lore-file__art">
           ${art}
           <span class="lore-file__shade"></span>
-          ${lock}
+          ${state}
           <span class="lore-file__file">${item.file}</span>
         </div>
         <div class="lore-file__body">
           <span class="lore-file__role">${item.role}</span>
           <h4>${item.name}</h4>
           <p>${item.teaser}</p>
-          ${item.open ? `<span class="lore-file__more">Читать досье →</span>` : `<span class="lore-file__more">ЛОР ГОТОВИТСЯ</span>`}
+          <span class="lore-file__more">${stateText}</span>
         </div>
       </article>`;
   };
@@ -379,6 +427,55 @@
     if (loadDoc && cat !== "other") renderLoreDoc(cat === "place" ? "place" : "chronos");
   };
 
+  let loreToastTimer = null;
+  const showLoreToast = (text) => {
+    const toast = $("#lore-toast");
+    if (!toast) return;
+    toast.textContent = text;
+    toast.classList.add("is-visible");
+    clearTimeout(loreToastTimer);
+    loreToastTimer = setTimeout(() => toast.classList.remove("is-visible"), 4600);
+  };
+
+  const updateLorePlaceFeature = () => {
+    const feature = document.querySelector('[data-lore-only="place"].lore-feature');
+    if (!feature) return;
+    const open = isLoreDocUnlocked("place");
+    const read = isLoreRead("place");
+
+    feature.classList.toggle("is-locked", !open);
+
+    const stamp = $("#lore-place-stamp");
+    if (stamp) stamp.textContent = read ? "ПРОЧИТАНО" : open ? "ДОСЬЕ ОТКРЫТО" : "ДОСЬЕ ЗАСЕКРЕЧЕНО";
+
+    const status = $("#lore-place-status");
+    if (status) {
+      status.innerHTML = `<i></i> ${read ? "АРХИВ ПРОЧИТАН" : open ? "АРХИВ РАССЕКРЕЧЕН" : "ДОСТУП ЗАКРЫТ"}`;
+    }
+
+    const locked = $("#lore-place-locked");
+    if (locked) locked.hidden = open;
+
+    const gate = $("#lore-place-gate");
+    if (gate) gate.hidden = open;
+
+    const download = $("#lore-place-download");
+    if (download) download.hidden = !open;
+
+    const chronosStamp = $("#lore-chronos-stamp");
+    if (chronosStamp) chronosStamp.textContent = isLoreRead("chronos") ? "ПРОЧИТАНО" : "ДОСЬЕ ОТКРЫТО";
+  };
+
+  const updateLoreAccess = () => {
+    renderLoreArchive();
+    updateLorePlaceFeature();
+    const meta = $("#lore-meta-open");
+    if (meta) {
+      const count = Object.keys(LORE_DOCS).filter(isLoreDocUnlocked).length;
+      meta.textContent = String(count).padStart(2, "0");
+    }
+  };
+
   const scrollToLoreReader = () => {
     const article = $("#lore-article");
     if (!article) return;
@@ -401,6 +498,8 @@
     bar.style.width = pct + "%";
     label.textContent = pct + "%";
 
+    if (pct >= 95 && currentLoreDoc) markLoreRead(currentLoreDoc);
+
     const marker = window.scrollY + 150;
     let active = null;
     $$(".lore-chapter", article).forEach((ch) => {
@@ -419,22 +518,9 @@
     updateLoreProgress();
   };
 
-  let currentLoreDoc = null;
   const loreCache = {};
 
-  const renderLoreDoc = (key, { scroll = false } = {}) => {
-    const doc = LORE_DOCS[key];
-    const content = $("#lore-content");
-    if (!doc || !content) return;
-
-    if (doc.cat && doc.cat !== currentLoreCat) setLoreCat(doc.cat);
-
-    if (currentLoreDoc === key) {
-      if (scroll) scrollToLoreReader();
-      return;
-    }
-    currentLoreDoc = key;
-
+  const paintLoreChrome = (doc) => {
     const fileEl = $("#lore-article-file");
     if (fileEl) fileEl.textContent = doc.fileLabel;
     const titleEl = $("#lore-article-title");
@@ -449,9 +535,115 @@
     if (tocFoot) tocFoot.textContent = doc.tocFoot;
     const dl = $("#lore-download");
     if (dl) {
+      dl.hidden = false;
       dl.href = doc.file;
       dl.download = doc.download;
     }
+  };
+
+  let loreFootObserver = null;
+  const bindLoreCompletion = () => {
+    loreFootObserver?.disconnect();
+    const foot = $("#lore-article-foot");
+    if (!foot || !("IntersectionObserver" in window)) return;
+    loreFootObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && currentLoreDoc) {
+          markLoreRead(currentLoreDoc);
+        }
+      },
+      { threshold: 0.75 }
+    );
+    loreFootObserver.observe(foot);
+  };
+
+  const markLoreRead = (key) => {
+    if (!key || loreRead.has(key) || !loreCache[key]) return;
+    loreRead.add(key);
+    saveLoreRead();
+    updateLoreAccess();
+
+    const unlocked = Object.keys(LORE_GATES).filter(
+      (gateKey) => LORE_GATES[gateKey].requires === key && isLoreDocUnlocked(gateKey)
+    );
+    if (unlocked.length) {
+      showLoreToast(`АРХИВ РАССЕКРЕТИЛ ДОСЬЕ «${LORE_DOCS[unlocked[0]].name.toUpperCase()}» · РАЗДЕЛ «МЕСТО»`);
+    } else {
+      showLoreToast(`ДОСЬЕ «${LORE_DOCS[key].name.toUpperCase()}» ПРОЧИТАНО`);
+    }
+  };
+
+  const renderLoreGate = (key) => {
+    const doc = LORE_DOCS[key];
+    const gate = LORE_GATES[key];
+    const req = gate && LORE_DOCS[gate.requires];
+    const content = $("#lore-content");
+    if (!content) return;
+
+    const dl = $("#lore-download");
+    if (dl) dl.hidden = true;
+
+    const toc = $("#lore-toc-links");
+    if (toc) toc.innerHTML = `<span class="lore-toc__empty">СОДЕРЖАНИЕ ЗАСЕКРЕЧЕНО</span>`;
+
+    const bar = $("#lore-progress");
+    if (bar) bar.style.width = "0%";
+    const label = $("#lore-progress-label");
+    if (label) label.textContent = "0%";
+    const foot = $("#lore-article-foot");
+    if (foot) foot.textContent = "Запись закрыта до прочтения предыдущего досье.";
+
+    content.innerHTML = `
+      <div class="lore-gate">
+        <span class="lore-gate__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+        <span class="lore-gate__kicker">ДОСТУП ОГРАНИЧЕН</span>
+        <h3>Досье «${doc.name}» засекречено</h3>
+        <p>Архив открывает записи по очереди. Сначала прочитай досье «${req ? req.name : "предыдущая запись"}» до конца — тогда следующая запись станет доступна.</p>
+        ${req ? `<button class="btn btn--primary" type="button" data-lore-read="${gate.requires}"><span>Читать «${req.name}»</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></button>` : ""}
+      </div>`;
+
+    bindLoreCompletion();
+  };
+
+  const requestLoreDoc = (key) => {
+    const doc = LORE_DOCS[key];
+    if (!doc) return;
+
+    if (!isLoreDocUnlocked(key)) {
+      const gate = LORE_GATES[key];
+      const req = gate && LORE_DOCS[gate.requires];
+      showLoreToast(`ДОСЬЕ ЗАКРЫТО · Сначала прочитай «${req ? req.name : "предыдущую запись"}» до конца`);
+      if (req) {
+        setLoreCat(req.cat, { loadDoc: true });
+        scrollToLoreReader();
+      }
+      return;
+    }
+
+    renderLoreDoc(key);
+    scrollToLoreReader();
+  };
+
+  const renderLoreDoc = (key, { scroll = false } = {}) => {
+    const doc = LORE_DOCS[key];
+    const content = $("#lore-content");
+    if (!doc || !content) return;
+
+    if (doc.cat && doc.cat !== currentLoreCat) setLoreCat(doc.cat);
+
+    paintLoreChrome(doc);
+
+    if (!isLoreDocUnlocked(key)) {
+      currentLoreDoc = null;
+      renderLoreGate(key);
+      return;
+    }
+
+    if (currentLoreDoc === key) {
+      if (scroll) scrollToLoreReader();
+      return;
+    }
+    currentLoreDoc = key;
 
     const paint = () => {
       const cached = loreCache[key];
@@ -466,6 +658,7 @@
           )
           .join("");
       }
+      bindLoreCompletion();
       requestAnimationFrame(updateLoreProgress);
       if (scroll) scrollToLoreReader();
     };
@@ -502,6 +695,7 @@
     const content = $("#lore-content");
     if (!content) return;
     setLoreCat("characters");
+    updateLoreAccess();
     initLoreProgress();
     renderLoreDoc("chronos");
 
@@ -511,11 +705,11 @@
       setLoreCat(btn.dataset.loreCat, { loadDoc: btn.dataset.loreCat !== "other" });
     });
 
-    $$("[data-lore-read]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        renderLoreDoc(btn.dataset.loreRead);
-        scrollToLoreReader();
-      });
+    $("#tab-lore")?.addEventListener("click", (e) => {
+      const read = e.target.closest("[data-lore-read]");
+      if (!read) return;
+      e.preventDefault();
+      requestLoreDoc(read.dataset.loreRead);
     });
 
     $("#lore-top")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }));
@@ -532,16 +726,21 @@
     });
 
     const archive = $("#lore-archive");
+    const openCard = (card) => {
+      if (card.dataset.loreOpen) requestLoreDoc(card.dataset.loreOpen);
+      else if (card.dataset.loreGate) requestLoreDoc(card.dataset.loreGate);
+    };
+
     archive?.addEventListener("click", (e) => {
-      const card = e.target.closest("[data-lore-open]");
-      if (card) renderLoreDoc(card.dataset.loreOpen, { scroll: true });
+      const card = e.target.closest("[data-lore-open], [data-lore-gate]");
+      if (card) openCard(card);
     });
     archive?.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
-      const card = e.target.closest("[data-lore-open]");
+      const card = e.target.closest("[data-lore-open], [data-lore-gate]");
       if (!card) return;
       e.preventDefault();
-      renderLoreDoc(card.dataset.loreOpen, { scroll: true });
+      openCard(card);
     });
   };
 

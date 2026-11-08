@@ -743,7 +743,7 @@
           <h1 class="page-head__title" data-text="LORE">LORE</h1>
           <p class="page-head__sub">За каждым раундом стоит чей-то неоплаченный долг. Вот только один из них умеет ходить.</p>
           <div class="page-head__meta">
-            <span><b>02</b> досье открыто</span>
+            <span><b id="lore-meta-open">01</b> досье открыто</span>
             <span><b>22</b> главы</span>
             <span><b>346</b> фрагментов</span>
           </div>
@@ -778,7 +778,7 @@
               <img src="assets/chronos.png" alt="Хронос" draggable="false">
               <div class="lore-feature__shade"></div>
               <div class="lore-feature__scan"></div>
-              <span class="lore-feature__stamp">ДОСЬЕ ОТКРЫТО</span>
+              <span class="lore-feature__stamp" id="lore-chronos-stamp">ДОСЬЕ ОТКРЫТО</span>
               <span class="lore-feature__file">FILE // LR-001</span>
               <span class="lore-feature__cross lore-feature__cross--tl"></span>
               <span class="lore-feature__cross lore-feature__cross--br"></span>
@@ -816,14 +816,19 @@
               <img src="assets/maps/crossroads.jpg" alt="Место" draggable="false">
               <div class="lore-feature__shade"></div>
               <div class="lore-feature__scan"></div>
-              <span class="lore-feature__stamp">ДОСЬЕ ОТКРЫТО</span>
+              <span class="lore-feature__locked" id="lore-place-locked">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                Доступ закрыт
+                <span>Прочитай досье «Хронос» до конца</span>
+              </span>
+              <span class="lore-feature__stamp" id="lore-place-stamp">ДОСЬЕ ЗАСЕКРЕЧЕНО</span>
               <span class="lore-feature__file">FILE // LR-000</span>
               <span class="lore-feature__cross lore-feature__cross--tl"></span>
               <span class="lore-feature__cross lore-feature__cross--br"></span>
             </div>
             <div class="lore-feature__body">
               <div class="lore-feature__top">
-                <span class="lore-feature__status"><i></i> АРХИВ РАССЕКРЕЧЕН</span>
+                <span class="lore-feature__status" id="lore-place-status"><i></i> ДОСТУП ЗАКРЫТ</span>
                 <span class="lore-feature__len">9 ГЛАВ · ~18 МИН</span>
               </div>
               <h2>МЕСТО</h2>
@@ -836,12 +841,13 @@
                 <div><span>АДРЕС</span><b>Отсутствует</b></div>
                 <div><span>НОМЕР</span><b>LR-000</b></div>
               </div>
+              <p class="lore-feature__gate" id="lore-place-gate">Доступ откроется после прочтения досье «Хронос» до конца.</p>
               <div class="lore-feature__actions">
                 <button class="btn btn--primary" type="button" data-lore-read="place">
                   <span>Читать досье</span>
                   <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>
                 </button>
-                <a class="btn btn--ghost" href="lore/place.md" download="Place_lore_final.md">
+                <a class="btn btn--ghost" id="lore-place-download" href="lore/place.md" download="Place_lore_final.md" hidden>
                   <span>Скачать .md</span>
                   <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v9M4 8l4 4 4-4M3 14h10"/></svg>
                 </a>
@@ -980,7 +986,7 @@
             <div class="section-head reveal">
               <div class="section-head__kicker"><i></i> АРХИВ</div>
               <h2>Досье архива</h2>
-              <p>Часть записей уже рассекречена. Остальные появятся, когда архив разберут.</p>
+              <p>Записи открываются по очереди: дочитай одно досье — архив рассекретит следующее.</p>
             </div>
             <div class="lore-archive__grid" id="lore-archive"></div>
           </section>
@@ -989,6 +995,8 @@
             <span class="note__mark">i</span>
             Текст досье — авторский лор проекта. Файл доступен для скачивания в формате Markdown.
           </div>
+
+          <div class="lore-toast" id="lore-toast" role="status" aria-live="polite"></div>
         </div>
       </section>
     </section>
