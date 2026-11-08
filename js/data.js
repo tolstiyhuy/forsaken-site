@@ -317,7 +317,7 @@ const SITE_DATA = {
     {
       id: "battlegrounds",
       name: "Classic Battlegrounds",
-      ru: "Классические поля",
+      ru: "Классические бои",
       tag: "В РОТАЦИИ",
       type: "Открытая",
       danger: 2,
