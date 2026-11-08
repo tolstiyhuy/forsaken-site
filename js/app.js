@@ -220,6 +220,7 @@
   const LORE_DOCS = {
     chronos: {
       file: "lore/chronos.md",
+      cat: "characters",
       name: "Хронос",
       sub: "Он и есть та самая лишняя секунда.",
       fileLabel: "ЛОР-ДОСЬЕ // LR-001",
@@ -245,6 +246,7 @@
     },
     place: {
       file: "lore/place.md",
+      cat: "place",
       name: "Место",
       sub: "Вечный ад — это не мир. Это счёт, который ведут.",
       fileLabel: "ЛОР-ДОСЬЕ // LR-000",
@@ -255,18 +257,23 @@
     }
   };
 
+  let currentLoreCat = "characters";
+
   const LORE_ARCHIVE = [
-    { id: "place", name: "Место", role: "PLACE", file: "LR-000", doc: "place", open: true, img: "assets/maps/crossroads.jpg", teaser: "Вечный ад. То, из чего собраны все карты, и то, что собирает с них долг." },
-    { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", doc: "chronos", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
-    { id: "twotime", name: "Two Time", role: "SURVIVOR", file: "LR-002", teaser: "Культист, чья вера стоила Azure жизни." },
-    { id: "johndoe", name: "John Doe", role: "KILLER", file: "LR-003", teaser: "Первый носитель кода." },
-    { id: "shedletsky", name: "Shedletsky", role: "SURVIVOR", file: "LR-004", teaser: "Тот, кто протянул куриную ножку." },
-    { id: "1x1x1x1", name: "1x1x1x1", role: "KILLER", file: "LR-005", teaser: "Существо из четвёртого измерения." },
-    { id: "slasher", name: "Slasher", role: "KILLER", file: "LR-006", teaser: "Солдат, которого забрала книга." },
-    { id: "j91nd", name: "J91nD", role: "SURVIVOR", file: "LR-007", teaser: "Строитель, который платит вперёд." },
-    { id: "doombringer", name: "DoomBringer", role: "KILLER", file: "LR-008", teaser: "Молот, который не остановить." },
-    { id: "walker", name: "Walker", role: "KILLER", file: "LR-009", teaser: "Тот, кто собирает души." },
-    { id: "adminjohndoe", name: "Admin John Doe", role: "KILLER", file: "LR-010", teaser: "Истинный испорченный код." }
+    { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", doc: "chronos", cat: "characters", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
+    { id: "twotime", name: "Two Time", role: "SURVIVOR", file: "LR-002", cat: "characters", teaser: "Культист, чья вера стоила Azure жизни." },
+    { id: "johndoe", name: "John Doe", role: "KILLER", file: "LR-003", cat: "characters", teaser: "Первый носитель кода." },
+    { id: "shedletsky", name: "Shedletsky", role: "SURVIVOR", file: "LR-004", cat: "characters", teaser: "Тот, кто протянул куриную ножку." },
+    { id: "1x1x1x1", name: "1x1x1x1", role: "KILLER", file: "LR-005", cat: "characters", teaser: "Существо из четвёртого измерения." },
+    { id: "slasher", name: "Slasher", role: "KILLER", file: "LR-006", cat: "characters", teaser: "Солдат, которого забрала книга." },
+    { id: "j91nd", name: "J91nD", role: "SURVIVOR", file: "LR-007", cat: "characters", teaser: "Строитель, который платит вперёд." },
+    { id: "doombringer", name: "DoomBringer", role: "KILLER", file: "LR-008", cat: "characters", teaser: "Молот, который не остановить." },
+    { id: "walker", name: "Walker", role: "KILLER", file: "LR-009", cat: "characters", teaser: "Тот, кто собирает души." },
+    { id: "adminjohndoe", name: "Admin John Doe", role: "KILLER", file: "LR-010", cat: "characters", teaser: "Истинный испорченный код." },
+    { id: "place", name: "Место", role: "PLACE", file: "LR-000", doc: "place", cat: "place", open: true, img: "assets/maps/crossroads.jpg", teaser: "Вечный ад. То, из чего собраны все карты, и то, что собирает с них долг." },
+    { id: "timeline", name: "Хронология", role: "ARCHIVE", file: "LR-011", cat: "other", teaser: "Одна ночь, поле и всё, что случилось после." },
+    { id: "rules", name: "Правила раунда", role: "ARCHIVE", file: "LR-012", cat: "other", teaser: "Свод законов места, записанный со слов выживших." },
+    { id: "glossary", name: "Словарь архива", role: "ARCHIVE", file: "LR-013", cat: "other", teaser: "Секунда, долг, шов, квитанция. Как это называть." }
   ];
 
   const escapeHTML = (text) =>
@@ -345,7 +352,31 @@
   const renderLoreArchive = () => {
     const grid = $("#lore-archive");
     if (!grid) return;
-    grid.innerHTML = LORE_ARCHIVE.map(loreFileHTML).join("");
+    grid.innerHTML = LORE_ARCHIVE.filter((item) => item.cat === currentLoreCat)
+      .map(loreFileHTML)
+      .join("");
+  };
+
+  const setLoreCat = (cat, { loadDoc = false } = {}) => {
+    if (!["characters", "place", "other"].includes(cat)) cat = "characters";
+    currentLoreCat = cat;
+
+    $$("#lore-cats [data-lore-cat]").forEach((btn) => {
+      const on = btn.dataset.loreCat === cat;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+    });
+
+    $$("[data-lore-only]").forEach((el) => {
+      el.hidden = el.dataset.loreOnly !== cat;
+    });
+
+    const reader = $(".lore-reader");
+    if (reader) reader.hidden = cat === "other";
+
+    renderLoreArchive();
+
+    if (loadDoc && cat !== "other") renderLoreDoc(cat === "place" ? "place" : "chronos");
   };
 
   const scrollToLoreReader = () => {
@@ -395,6 +426,8 @@
     const doc = LORE_DOCS[key];
     const content = $("#lore-content");
     if (!doc || !content) return;
+
+    if (doc.cat && doc.cat !== currentLoreCat) setLoreCat(doc.cat);
 
     if (currentLoreDoc === key) {
       if (scroll) scrollToLoreReader();
@@ -468,11 +501,23 @@
   const initLore = () => {
     const content = $("#lore-content");
     if (!content) return;
-    renderLoreArchive();
+    setLoreCat("characters");
     initLoreProgress();
     renderLoreDoc("chronos");
 
-    $("#lore-read")?.addEventListener("click", scrollToLoreReader);
+    $("#lore-cats")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-lore-cat]");
+      if (!btn) return;
+      setLoreCat(btn.dataset.loreCat, { loadDoc: btn.dataset.loreCat !== "other" });
+    });
+
+    $$("[data-lore-read]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        renderLoreDoc(btn.dataset.loreRead);
+        scrollToLoreReader();
+      });
+    });
+
     $("#lore-top")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }));
 
     const toc = $("#lore-toc-links");

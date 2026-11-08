@@ -752,16 +752,28 @@
 
       <section class="section section--tight">
         <div class="container">
+          <div class="lore-cats reveal" id="lore-cats" role="tablist" aria-label="Разделы лора">
+            <button class="lore-cat is-active" type="button" role="tab" aria-selected="true" data-lore-cat="characters">
+              <span>ПЕРСОНАЖИ</span><b>10</b>
+            </button>
+            <button class="lore-cat" type="button" role="tab" aria-selected="false" data-lore-cat="place">
+              <span>МЕСТО</span><b>01</b>
+            </button>
+            <button class="lore-cat" type="button" role="tab" aria-selected="false" data-lore-cat="other">
+              <span>ПРОЧЕЕ</span><b>03</b>
+            </button>
+          </div>
+
           <div class="lore-warning reveal">
             <span class="lore-warning__mark">!</span>
             <div>
               <b>ВНИМАНИЕ: СПОЙЛЕРЫ</b>
-              <p>В досье раскрываются связи John Doe, Two Time, Shedletsky, Slasher и других персонажей. Если ты ещё не читал их истории — начни с досье, а не с этого архива.</p>
+              <p>В досье раскрываются связи John Doe, Two Time, Shedletsky, Slasher и других персонажей, а также устройство самого места. Если ты ещё не читал их истории — начни с досье, а не с этого архива.</p>
             </div>
             <span class="lore-warning__tag">LR-000 / LR-001</span>
           </div>
 
-          <div class="lore-feature reveal" id="lore-feature">
+          <div class="lore-feature reveal" id="lore-feature" data-lore-only="characters">
             <div class="lore-feature__art">
               <img src="assets/chronos.png" alt="Хронос" draggable="false">
               <div class="lore-feature__shade"></div>
@@ -787,7 +799,7 @@
                 <div><span>ОРУЖИЕ</span><b>Клинок из секунды</b></div>
               </div>
               <div class="lore-feature__actions">
-                <button class="btn btn--primary" id="lore-read" type="button">
+                <button class="btn btn--primary" id="lore-read" type="button" data-lore-read="chronos">
                   <span>Читать досье</span>
                   <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>
                 </button>
@@ -797,6 +809,49 @@
                 </a>
               </div>
             </div>
+          </div>
+
+          <div class="lore-feature reveal" data-lore-only="place" hidden>
+            <div class="lore-feature__art">
+              <img src="assets/maps/crossroads.jpg" alt="Место" draggable="false">
+              <div class="lore-feature__shade"></div>
+              <div class="lore-feature__scan"></div>
+              <span class="lore-feature__stamp">ДОСЬЕ ОТКРЫТО</span>
+              <span class="lore-feature__file">FILE // LR-000</span>
+              <span class="lore-feature__cross lore-feature__cross--tl"></span>
+              <span class="lore-feature__cross lore-feature__cross--br"></span>
+            </div>
+            <div class="lore-feature__body">
+              <div class="lore-feature__top">
+                <span class="lore-feature__status"><i></i> АРХИВ РАССЕКРЕЧЕН</span>
+                <span class="lore-feature__len">9 ГЛАВ · ~18 МИН</span>
+              </div>
+              <h2>МЕСТО</h2>
+              <p class="lore-feature__sub">Вечный ад. Счёт, которому дали комнаты</p>
+              <p class="lore-feature__quote">«Таймер уже идёт.»</p>
+              <p class="lore-feature__desc">У места нет адреса — только номер. Оно не строит миры, а занимает чужие: снимает копии с уголков Robloxia вместе с их последним днём и собирает с них долг. Карты, лобби, таймер и даже убийцы — строки одной бухгалтерии.</p>
+              <div class="lore-feature__stats">
+                <div><span>РОЛЬ</span><b>Не персонаж</b></div>
+                <div><span>СТАТУС</span><b>Всегда открыто</b></div>
+                <div><span>АДРЕС</span><b>Отсутствует</b></div>
+                <div><span>НОМЕР</span><b>LR-000</b></div>
+              </div>
+              <div class="lore-feature__actions">
+                <button class="btn btn--primary" type="button" data-lore-read="place">
+                  <span>Читать досье</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>
+                </button>
+                <a class="btn btn--ghost" href="lore/place.md" download="Place_lore_final.md">
+                  <span>Скачать .md</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v9M4 8l4 4 4-4M3 14h10"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="note reveal" data-lore-only="other" hidden>
+            <span class="note__mark">i</span>
+            Хронология, правила раунда и словарь архива ещё не рассекречены. Пока открыты только досье персонажей и самого места.
           </div>
 
           <div class="lore-reader">
@@ -840,7 +895,7 @@
             </article>
           </div>
 
-          <div class="lore-beats reveal">
+          <div class="lore-beats reveal" data-lore-only="characters">
             <div class="lore-beats__head">
               <span>ХРОНОЛОГИЯ</span>
               <b>ОДНА НОЧЬ, КОТОРАЯ СОЗДАЛА УБИЙЦУ</b>
@@ -855,7 +910,7 @@
             </ol>
           </div>
 
-          <section class="lore-links">
+          <section class="lore-links" data-lore-only="characters">
             <div class="section-head reveal">
               <div class="section-head__kicker"><i></i> СВЯЗИ</div>
               <h2>Персонажи в этой истории</h2>
