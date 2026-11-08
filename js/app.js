@@ -494,7 +494,7 @@
     observeReveals();
     requestAnimationFrame(revealVisible);
     if (tab === "lore") requestAnimationFrame(updateLoreProgress);
-    if (tab === "maps") requestAnimationFrame(primeMapPhotos);
+    if (tab === "maps") primeMapPhotos();
   };
 
   /* ---------- filters ---------- */
