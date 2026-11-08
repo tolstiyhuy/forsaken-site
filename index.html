@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORSAKEN — Roblox Horror</title>
+  <meta name="description" content="FORSAKEN — асимметричный хоррор в Roblox. Убийцы, выжившие, карты, предметы и механики.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2309090b'/%3E%3Cpath d='M32 8 54 20v24L32 56 10 44V20Z' fill='none' stroke='%23e01b24' stroke-width='3'/%3E%3Cpath d='M22 25c4-6 16-6 20 0M24 40c3 5 13 5 16 0' stroke='%23f8d96d' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="is-loading">
+
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <div class="preloader__sigil">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 3 57 17v30L32 61 7 47V17Z" />
+          <path d="M20 24c5-7 19-7 24 0M22 41c4 6 16 6 20 0" />
+        </svg>
+      </div>
+      <div class="preloader__title" data-text="FORSAKEN">FORSAKEN</div>
+      <div class="preloader__bar"><span></span></div>
+      <div class="preloader__status">ЗАГРУЗКА ДЕЛА <span id="loader-pct">00</span>%</div>
+    </div>
+  </div>
+
+  <div class="grain" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+
+  <header class="site-header" id="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="#home" data-tab="home" aria-label="FORSAKEN — на главную">
+        <span class="brand__mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 3 57 17v30L32 61 7 47V17Z" />
+            <path d="M20 24c5-7 19-7 24 0M22 41c4 6 16 6 20 0" />
+          </svg>
+        </span>
+        <span class="brand__text">FORSAKEN<small>case file 001</small></span>
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Основная навигация">
+        <button class="nav__link is-active" data-tab="home">Главная</button>
+        <button class="nav__link" data-tab="killers">Убийцы</button>
+        <button class="nav__link" data-tab="survivors">Выжившие</button>
+        <button class="nav__link" data-tab="maps">Карты</button>
+        <button class="nav__link" data-tab="items">Предметы</button>
+        <button class="nav__link" data-tab="mechanics">Механики</button>
+        <button class="nav__link" data-tab="lore">Лор</button>
+        <button class="nav__link" data-tab="updates">Патчи</button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false" title="Эмбиент">
+          <span class="sound-toggle__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="sound-toggle__label">sound off</span>
+        </button>
+        <a class="btn btn--primary btn--small" href="https://www.roblox.com/games/100668519081940" target="_blank" rel="noopener">
+          <span>Играть</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13 13 3M6 3h7v7"/></svg>
+        </a>
+        <button class="burger" id="burger" type="button" aria-label="Меню" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============ HOME ============ -->
+    <section class="tab-panel is-active" id="tab-home" data-panel="home">
+      <div class="hero">
+        <div class="hero__art">
+          <div class="hero__glow"></div>
+          <img src="assets/johndoe.png" alt="John Doe" class="hero__img" id="hero-img">
+          <div class="hero__art-fade"></div>
+        </div>
+
+        <div class="container hero__content">
+          <div class="eyebrow reveal">
+            <span class="eyebrow__dot"></span>
+            ROBLOX ASYMMETRIC HORROR
+            <span class="eyebrow__line"></span>
+            <span class="eyebrow__code">v1.0.23</span>
+          </div>
+
+          <h1 class="hero__title" data-text="FORSAKEN">FORSAKEN</h1>
+
+          <p class="hero__sub reveal">
+            Один убийца. Четверо выживших.<br>
+            <em>Никто не уйдёт целым.</em>
+          </p>
+
+          <div class="hero__actions reveal">
+            <a class="btn btn--primary" href="https://www.roblox.com/games/100668519081940" target="_blank" rel="noopener">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5v11l9-5.5-9-5.5Z"/></svg>
+              Начать игру
+            </a>
+            <button class="btn btn--ghost" data-tab="killers">
+              Смотреть убийц
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>
+            </button>
+          </div>
+
+          <div class="hero__meta reveal">
+            <span><b>07</b> убийц</span>
+            <span><b>03</b> выживших</span>
+            <span><b>10</b> карт</span>
+          </div>
+        </div>
+
+        <div class="hero__side">
+          <div class="hero__side-label">TERROR RADIUS</div>
+          <div class="hero__side-value">60<span>m</span></div>
+          <div class="hero__side-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+
+        <div class="hero__footer container">
+          <div class="hero__hint"><span class="mouse"></span> Прокрути вниз</div>
+          <div class="hero__warn">⚠ СЦЕНЫ НАСИЛИЯ · НЕ ДЛЯ СЛАБЫХ НЕРВОВ</div>
+        </div>
+      </div>
+
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker__track">
+          <span>YOU CAN'T ESCAPE ME</span><i>✖</i>
+          <span>SHADOWS DIE TWICE</span><i>✖</i>
+          <span>TICK TOCK. YOUR TIME IS RUNNING OUT</span><i>✖</i>
+          <span>BLAME SOSALKEN</span><i>✖</i>
+          <span>BUILD. BLOCK. SURVIVE.</span><i>✖</i>
+          <span>YOU CAN'T ESCAPE ME</span><i>✖</i>
+          <span>SHADOWS DIE TWICE</span><i>✖</i>
+          <span>TICK TOCK. YOUR TIME IS RUNNING OUT</span><i>✖</i>
+          <span>BLAME SOSALKEN</span><i>✖</i>
+          <span>BUILD. BLOCK. SURVIVE.</span><i>✖</i>
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-head reveal">
+            <div class="section-head__index">00 <span>/</span> ДОСЬЕ</div>
+            <h2 class="section-head__title">Что такое <span>FORSAKEN</span></h2>
+            <p class="section-head__text">
+              Асимметричный хоррор, где один игрок становится убийцей, а остальные — выжившими.
+              Прячься, беги, используй способности и не дай ужасу подобраться слишком близко.
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature reveal">
+              <div class="feature__num">01</div>
+              <div class="feature__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 20h18L12 3Z"/><path d="M12 9v5M12 17v.5"/></svg>
+              </div>
+              <h3>Один против всех</h3>
+              <p>Убийца сильнее каждого по отдельности. Выжившие побеждают только вместе — или по очереди.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="feature__num">02</div>
+              <div class="feature__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg>
+              </div>
+              <h3>Terror Radius</h3>
+              <p>Чем ближе убийца — тем громче и быстрее музыка. Сердце подскажет раньше глаз.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="feature__num">03</div>
+              <div class="feature__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M9 4h11v11"/><path d="M5 9v10h10"/></svg>
+              </div>
+              <h3>Уникальные киты</h3>
+              <p>У каждого персонажа свой набор способностей: ловушки, рывки, контроль времени и чистая ярость.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="feature__num">04</div>
+              <div class="feature__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10Z"/><path d="M12 8v6M9 11h6"/></svg>
+              </div>
+              <h3>Всё решает риск</h3>
+              <p>Аптечка на семь секунд. Ритуал на полпути. Один неверный шаг — и охота окончена.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--start">
+        <div class="container">
+          <div class="section-head reveal">
+            <div class="section-head__index">00.1 <span>/</span> ПЕРВЫЕ ШАГИ</div>
+            <h2 class="section-head__title">Как выжить <span>первую ночь</span></h2>
+            <p class="section-head__text">Три шага, которые отделяют тебя от первого матча. Всё остальное — практика, слух и немного паранойи.</p>
+          </div>
+
+          <div class="start-grid">
+            <div class="start-steps">
+              <article class="start-step reveal">
+                <div class="start-step__num">01</div>
+                <div class="start-step__body">
+                  <h3>Запусти Roblox</h3>
+                  <p>Открой опыт по кнопке «Играть». Загрузка карты и лобби занимает несколько секунд.</p>
+                </div>
+                <div class="start-step__meta">CLIENT</div>
+              </article>
+              <article class="start-step reveal">
+                <div class="start-step__num">02</div>
+                <div class="start-step__body">
+                  <h3>Выбери сторону</h3>
+                  <p>Убийца охотится, выживший прячется. В лобби можно осмотреть киты до старта раунда.</p>
+                </div>
+                <div class="start-step__meta">ROLE</div>
+              </article>
+              <article class="start-step reveal">
+                <div class="start-step__num">03</div>
+                <div class="start-step__body">
+                  <h3>Не оглядывайся</h3>
+                  <p>Слушай terror radius, считай кулдауны и не геройствуй. Один выживший важнее красивой смерти.</p>
+                </div>
+                <div class="start-step__meta">SURVIVE</div>
+              </article>
+            </div>
+
+            <a class="patch-card reveal" href="#updates" data-tab="updates">
+              <div class="patch-card__top">
+                <span class="patch-card__label">LATEST BUILD</span>
+                <span class="patch-card__dot"></span>
+              </div>
+              <div class="patch-card__ver">1.0.23</div>
+              <h3>Финальный свет</h3>
+              <ul>
+                <li>Atmosphere и Bloom перенастроены</li>
+                <li>Лёгкая цветокоррекция сцены</li>
+                <li>24 сборки в журнале</li>
+              </ul>
+              <span class="patch-card__link">Смотреть все патчи <svg viewBox="0 0 16 16"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--roles">
+        <div class="container">
+          <div class="section-head section-head--center reveal">
+            <div class="section-head__index">01 <span>/</span> СТОРОНЫ</div>
+            <h2 class="section-head__title">Выбери свою <span>роль</span></h2>
+          </div>
+
+          <div class="role-split">
+            <article class="role-card role-card--killer reveal" data-tab="killers">
+              <div class="role-card__bg" style="background-image:url('assets/slasher.png')"></div>
+              <div class="role-card__shade"></div>
+              <div class="role-card__content">
+                <div class="role-card__tag">KILLER</div>
+                <h3>Убийца</h3>
+                <p>Выслеживай. Ломай. Не давай им собраться с силами.</p>
+                <div class="role-card__stats">
+                  <span>HP <b>400–1800</b></span>
+                  <span>Скорость <b>7.5–21</b></span>
+                </div>
+                <span class="role-card__link">Открыть досье <svg viewBox="0 0 16 16"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span>
+              </div>
+            </article>
+
+            <article class="role-card role-card--survivor reveal" data-tab="survivors">
+              <div class="role-card__bg" style="background-image:url('assets/twotime.png')"></div>
+              <div class="role-card__shade"></div>
+              <div class="role-card__content">
+                <div class="role-card__tag">SURVIVOR</div>
+                <h3>Выживший</h3>
+                <p>Держись в тени. Считай секунды. Верь только себе.</p>
+                <div class="role-card__stats">
+                  <span>HP <b>75–100</b></span>
+                  <span>Скорость <b>12</b></span>
+                </div>
+                <span class="role-card__link">Открыть досье <svg viewBox="0 0 16 16"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="split-quote reveal">
+            <div class="split-quote__mark">“</div>
+            <blockquote>
+              The ground remembers my footsteps, and so will you.
+              <cite>— John Doe</cite>
+            </blockquote>
+            <div class="split-quote__side">
+              <span>NATURAL MALEVOLENCE</span>
+              <span>PASSIVE ABILITY</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--cta">
+        <div class="container">
+          <div class="cta-panel reveal">
+            <div class="cta-panel__glow"></div>
+            <div class="cta-panel__inner">
+              <div class="eyebrow"><span class="eyebrow__dot"></span> СЕРВЕРЫ ОТКРЫТЫ</div>
+              <h2>Готов войти<br>в <span>игру?</span></h2>
+              <p>Скачай Roblox, найди FORSAKEN и помни: тишина — это ещё не безопасность.</p>
+              <a class="btn btn--primary btn--large" href="https://www.roblox.com/games/100668519081940" target="_blank" rel="noopener">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5v11l9-5.5-9-5.5Z"/></svg>
+                Играть в Roblox
+              </a>
+            </div>
+            <div class="cta-panel__art" style="background-image:url('assets/chronos.png')"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ KILLERS ============ -->
+    <section class="tab-panel" id="tab-killers" data-panel="killers">
+      <div class="page-head">
+        <div class="page-head__bg" style="background-image:url('assets/johndoe.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ДОСЬЕ</span><i>/</i><b>УБИЙЦЫ</b></div>
+          <h1 class="page-head__title" data-text="KILLERS">KILLERS</h1>
+          <p class="page-head__sub">Те, кто не оставляет следов. Только тела.</p>
+          <div class="page-head__meta">
+            <span><b>07</b> записей</span>
+            <span><b>02</b> легендарных</span>
+            <span><b>01</b> админ</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <div class="toolbar reveal">
+            <div class="filters" id="killer-filters">
+              <button class="chip is-active" data-filter="all">Все</button>
+              <button class="chip" data-filter="legendary">Легендарные</button>
+              <button class="chip" data-filter="common">Обычные</button>
+              <button class="chip" data-filter="admin">Админ</button>
+            </div>
+            <div class="toolbar__count"><b id="killer-count">7</b> / 7</div>
+          </div>
+
+          <div class="char-grid" id="killers-grid"></div>
+
+          <div class="compare-block reveal">
+            <div class="section-head section-head--small">
+              <div class="section-head__index">02 <span>/</span> СРАВНЕНИЕ</div>
+              <h2 class="section-head__title">Характеристики <span>убийц</span></h2>
+              <p class="section-head__text">Нажми на строку, чтобы открыть досье. Заголовки колонок сортируют таблицу.</p>
+            </div>
+            <div class="compare-wrap">
+              <table class="compare" id="killers-compare">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>ПЕРСОНАЖ</th>
+                    <th class="is-sortable" data-sort="hp">HP <span></span></th>
+                    <th class="is-sortable" data-sort="speed">СКОРОСТЬ <span></span></th>
+                    <th class="is-sortable" data-sort="terror">TERROR <span></span></th>
+                    <th class="is-sortable" data-sort="abilities">СПОСОБНОСТИ <span></span></th>
+                    <th class="is-sortable" data-sort="price">ЦЕНА <span></span></th>
+                  </tr>
+                </thead>
+                <tbody id="compare-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="note reveal">
+            <span class="note__mark">!</span>
+            Административные персонажи недоступны в обычной ротации. Характеристики могут меняться с патчами.
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ SURVIVORS ============ -->
+    <section class="tab-panel" id="tab-survivors" data-panel="survivors">
+      <div class="page-head page-head--survivors">
+        <div class="page-head__bg" style="background-image:url('assets/twotime.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ДОСЬЕ</span><i>/</i><b>ВЫЖИВШИЕ</b></div>
+          <h1 class="page-head__title" data-text="SURVIVORS">SURVIVORS</h1>
+          <p class="page-head__sub">У них нет шансов. Есть только время.</p>
+          <div class="page-head__meta">
+            <span><b>03</b> записи</span>
+            <span><b>02</b> платных</span>
+            <span><b>12</b> скорость</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <div class="char-grid char-grid--three" id="survivors-grid"></div>
+
+          <div class="note reveal">
+            <span class="note__mark">!</span>
+            Все выжившие начинают с одинаковой скоростью. Разница — в способностях и цене ошибки.
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ MAPS ============ -->
+    <section class="tab-panel" id="tab-maps" data-panel="maps">
+      <div class="page-head page-head--maps">
+        <div class="page-head__bg" style="background-image:url('assets/slasher.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ЛОКАЦИИ</span><i>/</i><b>КАРТЫ</b></div>
+          <h1 class="page-head__title" data-text="MAPS">MAPS</h1>
+          <p class="page-head__sub">Десять мест, где лучше не задерживаться.</p>
+          <div class="page-head__meta">
+            <span><b>10</b> локаций</span>
+            <span><b>09</b> в ротации</span>
+            <span><b>01</b> тестовая</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <div class="map-grid" id="maps-grid"></div>
+          <div class="note reveal">
+            <span class="note__mark">!</span>
+            Нажми на карту, чтобы открыть досье локации: размер, особенности и советы по выживанию.
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ ITEMS ============ -->
+    <section class="tab-panel" id="tab-items" data-panel="items">
+      <div class="page-head page-head--items">
+        <div class="page-head__bg" style="background-image:url('assets/j91nd.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ИНВЕНТАРЬ</span><i>/</i><b>ПРЕДМЕТЫ</b></div>
+          <h1 class="page-head__title" data-text="ITEMS">ITEMS</h1>
+          <p class="page-head__sub">Иногда семь секунд — это целая жизнь.</p>
+          <div class="page-head__meta">
+            <span><b>01</b> предмет</span>
+            <span><b>80</b> HP заряд</span>
+            <span><b>35%</b> шанс спавна</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <article class="item-showcase reveal">
+            <div class="item-showcase__visual">
+              <div class="item-showcase__ring"></div>
+              <div class="item-showcase__ring item-showcase__ring--2"></div>
+              <svg class="item-showcase__icon" viewBox="0 0 120 120" aria-hidden="true">
+                <rect x="18" y="42" width="84" height="56" rx="8"/>
+                <path d="M48 42V30a12 12 0 0 1 24 0v12"/>
+                <path d="M60 58v24M48 70h24"/>
+              </svg>
+              <div class="item-showcase__label">CONSUMABLE</div>
+            </div>
+            <div class="item-showcase__body">
+              <div class="rarity rarity--common">ОБЫЧНЫЙ ПРЕДМЕТ</div>
+              <h2>Medkit <span>аптечка</span></h2>
+              <p class="item-showcase__desc">
+                Восстанавливает <b>80 HP</b> за <b>7 секунд</b>. Лечение прерывается, если получить урон.
+                Один заряд. Иногда это единственное, что отделяет тебя от следующей ошибки.
+              </p>
+              <div class="stat-grid">
+                <div class="stat"><span>Лечение</span><b>80 HP</b></div>
+                <div class="stat"><span>Время</span><b>7 сек</b></div>
+                <div class="stat"><span>Заряды</span><b>1</b></div>
+                <div class="stat"><span>Шанс спавна</span><b>35%</b></div>
+                <div class="stat"><span>На карте</span><b>0–2</b></div>
+                <div class="stat"><span>Множитель лечения</span><b>0.2</b></div>
+              </div>
+            </div>
+          </article>
+
+          <div class="item-flow reveal">
+            <div class="flow-step">
+              <span class="flow-step__num">01</span>
+              <h4>Найди аптечку</h4>
+              <p>Предмет не гарантирован: шанс спавна <b>35%</b>, на карте появляется от <b>0 до 2</b> штук.</p>
+            </div>
+            <div class="flow-step">
+              <span class="flow-step__num">02</span>
+              <h4>Начни лечение</h4>
+              <p>Один заряд восстанавливает <b>80 HP</b>. Скорость лечения снижена до <b>0.2</b> от обычной.</p>
+            </div>
+            <div class="flow-step">
+              <span class="flow-step__num">03</span>
+              <h4>Продержись 7 секунд</h4>
+              <p>Любой полученный урон прерывает процесс. Начинай лечение только в безопасном укрытии.</p>
+            </div>
+          </div>
+
+          <div class="item-rules reveal">
+            <div class="item-rules__head">
+              <span class="item-rules__mark">!</span>
+              <div>
+                <h3>Правила использования</h3>
+                <p>Аптечка — расходник, а не бесконечное лечение. Вот что важно помнить.</p>
+              </div>
+            </div>
+            <ul>
+              <li><b>Не лечись в открытую.</b> Семь секунд — достаточно, чтобы убийца успел подойти.</li>
+              <li><b>Считай урон.</b> Если урона больше 80 HP, тратить заряд невыгодно.</li>
+              <li><b>Один заряд.</b> После использования предмет исчезает из инвентаря.</li>
+              <li><b>Слушай terror radius.</b> Если музыка ускорилась — сначала беги, потом лечись.</li>
+            </ul>
+          </div>
+
+          <div class="section-head section-head--small reveal">
+            <div class="section-head__index">СКОРО <span>/</span> В РАЗРАБОТКЕ</div>
+            <h2 class="section-head__title">Следующие <span>предметы</span></h2>
+            <p class="section-head__text">Слоты инвентаря уже готовы. Осталось дождаться, что в них положат.</p>
+          </div>
+
+          <div class="locked-grid">
+            <article class="locked-card reveal">
+              <div class="locked-card__lock">
+                <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              </div>
+              <span>???</span>
+              <small>ДАННЫЕ ИЗЪЯТЫ</small>
+            </article>
+            <article class="locked-card reveal">
+              <div class="locked-card__lock">
+                <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              </div>
+              <span>???</span>
+              <small>ДАННЫЕ ИЗЪЯТЫ</small>
+            </article>
+            <article class="locked-card reveal">
+              <div class="locked-card__lock">
+                <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              </div>
+              <span>???</span>
+              <small>ДАННЫЕ ИЗЪЯТЫ</small>
+            </article>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ MECHANICS ============ -->
+    <section class="tab-panel" id="tab-mechanics" data-panel="mechanics">
+      <div class="page-head page-head--mechanics">
+        <div class="page-head__bg" style="background-image:url('assets/chronos.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ГАЙД</span><i>/</i><b>МЕХАНИКИ</b></div>
+          <h1 class="page-head__title" data-text="MECHANICS">MECHANICS</h1>
+          <p class="page-head__sub">Правила выживания. Читать до, а не после.</p>
+          <div class="page-head__meta">
+            <span><b>06</b> разделов</span>
+            <span><b>R15</b> управление</span>
+            <span><b>1</b> жизнь</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <div class="quickstart reveal">
+            <div class="quickstart__col quickstart__col--survivor">
+              <div class="quickstart__tag">SURVIVOR · 3 ШАГА</div>
+              <h3>Твоя задача — дожить</h3>
+              <ol>
+                <li><span>01</span><div><b>Слушай.</b> Terror radius громче любых глаз.</div></li>
+                <li><span>02</span><div><b>Ломай линию.</b> Углы, двери и стены — твои союзники.</div></li>
+                <li><span>03</span><div><b>Не спасай всех.</b> Один живой выживший лучше трёх мёртвых героев.</div></li>
+              </ol>
+            </div>
+            <div class="quickstart__col quickstart__col--killer">
+              <div class="quickstart__tag">KILLER · 3 ШАГА</div>
+              <h3>Твоя задача — закрыть раунд</h3>
+              <ol>
+                <li><span>01</span><div><b>Режь ротации.</b> Не гонись — встречай на выходе.</div></li>
+                <li><span>02</span><div><b>Держи кулдауны.</b> Способность в запасе страшнее использованной.</div></li>
+                <li><span>03</span><div><b>Ломай группы.</b> Один выживший без поддержки — уже труп.</div></li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="mech-grid">
+            <article class="mech reveal">
+              <div class="mech__num">01</div>
+              <h3>Роли и раунд</h3>
+              <p>Один игрок становится убийцей, остальные — выжившими. Цель убийцы — казнить всех. Цель выживших — дожить до конца раунда, используя укрытия, предметы и способности.</p>
+              <ul>
+                <li>Убийца видит ауры только по способностям</li>
+                <li>Выжившие не могут убить убийцу навсегда</li>
+                <li>Смерть не всегда окончательна</li>
+              </ul>
+            </article>
+
+            <article class="mech reveal">
+              <div class="mech__num">02</div>
+              <h3>Terror Radius</h3>
+              <p>У каждого убийцы свой радиус ужаса. Чем ближе он подходит, тем интенсивнее музыка и громче сердцебиение. Это твой главный радар — слушай, а не смотри.</p>
+              <ul>
+                <li>Радиус зависит от персонажа</li>
+                <li>Chase-тема включается на близкой дистанции</li>
+                <li>Некоторые способности временно скрывают убийцу</li>
+              </ul>
+            </article>
+
+            <article class="mech reveal">
+              <div class="mech__num">03</div>
+              <h3>Выносливость</h3>
+              <p>Бег расходует стамину. Когда шкала пуста — ты идёшь. Убийца тоже ограничен, но его запас и скорость обычно выше. Не беги по прямой: ломай линию зрения.</p>
+              <ul>
+                <li>Бег: Shift</li>
+                <li>Восстановление начинается после остановки</li>
+                <li>Предметы и способности могут дать рывок</li>
+              </ul>
+            </article>
+
+            <article class="mech reveal">
+              <div class="mech__num">04</div>
+              <h3>Статусы</h3>
+              <p>Эффекты складываются в уровни. Один и тот же дебафф может как замедлить, так и полностью выдать тебя убийце.</p>
+              <div class="status-list">
+                <span class="status status--bad">Corrupted</span>
+                <span class="status status--bad">Slowness</span>
+                <span class="status status--bad">Bleeding</span>
+                <span class="status status--good">Speed</span>
+                <span class="status status--good">Resistance</span>
+                <span class="status status--good">Invisibility</span>
+              </div>
+            </article>
+
+            <article class="mech reveal">
+              <div class="mech__num">05</div>
+              <h3>Кровь и ритуал</h3>
+              <p>Two Time собирает кровь ударами по убийце. Накопив достаточно и поставив точку ритуала, он получает шанс на вторую жизнь. Цена — риск подойти вплотную.</p>
+              <ul>
+                <li>Удар в спину даёт больше крови</li>
+                <li>Ритуал ставится только на ровной поверхности</li>
+                <li>Вторая жизнь слабее первой</li>
+              </ul>
+            </article>
+
+            <article class="mech reveal">
+              <div class="mech__num">06</div>
+              <h3>Управление</h3>
+              <div class="keybinds">
+                <div><kbd>WASD</kbd><span>Движение</span></div>
+                <div><kbd>Shift</kbd><span>Бег</span></div>
+                <div><kbd>Space</kbd><span>Прыжок</span></div>
+                <div><kbd>ЛКМ</kbd><span>Атака / способность</span></div>
+                <div><kbd>Q</kbd><span>Способность</span></div>
+                <div><kbd>E</kbd><span>Способность</span></div>
+                <div><kbd>R</kbd><span>Ultimate</span></div>
+                <div><kbd>T</kbd><span>Присесть</span></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="section-head section-head--small reveal">
+            <div class="section-head__index">07 <span>/</span> СПРАВОЧНИК</div>
+            <h2 class="section-head__title">Статусы и <span>эффекты</span></h2>
+            <p class="section-head__text">Короткая шпаргалка по тому, что именно на тебе висит и откуда это взялось.</p>
+          </div>
+
+          <div class="status-table-wrap reveal">
+            <table class="status-table">
+              <thead>
+                <tr><th>СТАТУС</th><th>ТИП</th><th>ЭФФЕКТ</th><th>ИСТОЧНИК</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><span class="status status--bad">Corrupted I</span></td><td>ДЕБАФФ</td><td>Выдаёт ауру и усиливает давление убийцы</td><td>John Doe, ловушки</td></tr>
+                <tr><td><span class="status status--bad">Slowness II</span></td><td>ДЕБАФФ</td><td>Сильно снижает скорость передвижения</td><td>Digital Footprint</td></tr>
+                <tr><td><span class="status status--bad">Bleeding</span></td><td>ДЕБАФФ</td><td>Не даёт полностью восстановить здоровье</td><td>Slasher, ножи</td></tr>
+                <tr><td><span class="status status--good">Speed I</span></td><td>БАФФ</td><td>Кратковременный рывок скорости</td><td>Slash, ловушки, способности</td></tr>
+                <tr><td><span class="status status--good">Invisibility III</span></td><td>БАФФ</td><td>Скрывает силуэт на короткое время</td><td>Two Time, Crouch</td></tr>
+                <tr><td><span class="status status--good">Undetectable I</span></td><td>БАФФ</td><td>Скрывает убийцу от радаров и аур</td><td>Способности убийц</td></tr>
+                <tr><td><span class="status status--good">Resistance</span></td><td>БАФФ</td><td>Сокращает время оглушения и контроль</td><td>Doombringer, предметы</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-head section-head--small reveal">
+            <div class="section-head__index">08 <span>/</span> FAQ</div>
+            <h2 class="section-head__title">Частые <span>вопросы</span></h2>
+          </div>
+
+          <div class="faq reveal">
+            <details class="faq__item">
+              <summary>Можно ли убить убийцу?</summary>
+              <p>Навсегда — нет. Выжившие могут нанести урон, оглушить или выиграть время, но раунд заканчивается не смертью убийцы, а survival-таймером или казнью всех выживших.</p>
+            </details>
+            <details class="faq__item">
+              <summary>Что такое terror radius?</summary>
+              <p>Это радиус ужаса вокруг убийцы. Чем ближе он находится, тем громче музыка и сердцебиение. Радиус зависит от персонажа: у Walker он меньше, у John Doe — больше.</p>
+            </details>
+            <details class="faq__item">
+              <summary>Как работает вторая жизнь Two Time?</summary>
+              <p>Two Time собирает кровь ударами по убийце. Накопив 8 единиц и поставив ритуал, он получает вторую жизнь с половиной максимального HP. Вторая жизнь не бесконечна.</p>
+            </details>
+            <details class="faq__item">
+              <summary>Сколько живут ловушки John Doe?</summary>
+              <p>Цифровые ловушки Digital Footprint живут 165 секунд. При активации они дают убийце Speed I, а жертве — Corrupted I и Slowness II на 10 секунд.</p>
+            </details>
+            <details class="faq__item">
+              <summary>Почему Admin John Doe такой сильный?</summary>
+              <p>Это административный персонаж-пасхалка. У него огромный запас HP и способность Kill Rush, но в обычной ротации он недоступен и не участвует в честном балансе.</p>
+            </details>
+            <details class="faq__item">
+              <summary>Где искать актуальные изменения?</summary>
+              <p>Во вкладке «Патчи»: там собраны все 24 сборки из журнала проекта, включая правки персонажей, карт, света и админских инструментов.</p>
+            </details>
+          </div>
+
+          <div class="tips reveal">
+            <div class="tips__title">ПЯТЬ ПРАВИЛ, КОТОРЫЕ СПАСАЮТ ЖИЗНИ</div>
+            <ol>
+              <li><span>01</span> Не беги, пока убийца не увидел тебя. Шаги слышно.</li>
+              <li><span>02</span> Запоминай карту до того, как начнётся погоня.</li>
+              <li><span>03</span> Аптечка лечит только при полной тишине.</li>
+              <li><span>04</span> Способность без кулдауна — не способность, а ловушка.</li>
+              <li><span>05</span> Если музыка стихла — это не значит, что он ушёл.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ LORE ============ -->
+    <section class="tab-panel" id="tab-lore" data-panel="lore">
+      <div class="page-head page-head--lore">
+        <div class="page-head__bg" style="background-image:url('assets/chronos.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>АРХИВ</span><i>/</i><b>ЛОР</b></div>
+          <h1 class="page-head__title" data-text="LORE">LORE</h1>
+          <p class="page-head__sub">За каждым раундом стоит чей-то неоплаченный долг. Вот только один из них умеет ходить.</p>
+          <div class="page-head__meta">
+            <span><b>01</b> досье открыто</span>
+            <span><b>13</b> глав</span>
+            <span><b>179</b> фрагментов</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <div class="lore-warning reveal">
+            <span class="lore-warning__mark">!</span>
+            <div>
+              <b>ВНИМАНИЕ: СПОЙЛЕРЫ</b>
+              <p>В досье раскрываются связи John Doe, Two Time, Shedletsky, Slasher и других персонажей. Если ты ещё не читал их истории — начни с досье, а не с этого архива.</p>
+            </div>
+            <span class="lore-warning__tag">LR-001</span>
+          </div>
+
+          <div class="lore-feature reveal" id="lore-feature">
+            <div class="lore-feature__art">
+              <img src="assets/chronos.png" alt="Хронос" draggable="false">
+              <div class="lore-feature__shade"></div>
+              <div class="lore-feature__scan"></div>
+              <span class="lore-feature__stamp">ДОСЬЕ ОТКРЫТО</span>
+              <span class="lore-feature__file">FILE // LR-001</span>
+              <span class="lore-feature__cross lore-feature__cross--tl"></span>
+              <span class="lore-feature__cross lore-feature__cross--br"></span>
+            </div>
+            <div class="lore-feature__body">
+              <div class="lore-feature__top">
+                <span class="lore-feature__status"><i></i> АРХИВ РАССЕКРЕЧЕН</span>
+                <span class="lore-feature__len">13 ГЛАВ · ~25 МИН</span>
+              </div>
+              <h2>ХРОНОС</h2>
+              <p class="lore-feature__sub">Лишняя секунда, которой не нашлось места</p>
+              <p class="lore-feature__quote">«Tick tock. Your time is running out.»</p>
+              <p class="lore-feature__desc">Он не выбирал быть убийцей. Он — долг, который мир одолжил у будущего и не вернул. Внутри его циферблата — последняя минута Two Time, внутри клинка — чужая смерть, а на груди — знак бога, которого никогда не существовало.</p>
+              <div class="lore-feature__stats">
+                <div><span>РОЛЬ</span><b>Убийца</b></div>
+                <div><span>СТАТУС</span><b>Вне раунда</b></div>
+                <div><span>ЗНАК</span><b>Спаун</b></div>
+                <div><span>ОРУЖИЕ</span><b>Клинок из секунды</b></div>
+              </div>
+              <div class="lore-feature__actions">
+                <button class="btn btn--primary" id="lore-read" type="button">
+                  <span>Читать досье</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>
+                </button>
+                <a class="btn btn--ghost" href="lore/chronos.md" download="Chronos_lore_final.md">
+                  <span>Скачать .md</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v9M4 8l4 4 4-4M3 14h10"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="lore-reader">
+            <aside class="lore-toc reveal">
+              <div class="lore-toc__head">
+                <span>СОДЕРЖАНИЕ</span>
+                <b id="lore-progress-label">0%</b>
+              </div>
+              <div class="lore-toc__bar"><i id="lore-progress"></i></div>
+              <nav id="lore-toc-links" aria-label="Главы досье"></nav>
+              <div class="lore-toc__foot">ХРОНОС · LR-001</div>
+            </aside>
+
+            <article class="lore-article reveal" id="lore-article">
+              <header class="lore-article__head">
+                <div class="lore-article__file">ЛОР-ДОСЬЕ // LR-001</div>
+                <h2>Хронос</h2>
+                <p>Он и есть та самая лишняя секунда.</p>
+                <div class="lore-article__meta">
+                  <span>13 ГЛАВ</span>
+                  <span>≈ 25 МИН ЧТЕНИЯ</span>
+                  <span>СПОЙЛЕРЫ</span>
+                </div>
+              </header>
+
+              <div id="lore-content">
+                <div class="lore-loading">
+                  <i></i>
+                  <span>ЗАГРУЗКА АРХИВА...</span>
+                </div>
+              </div>
+
+              <footer class="lore-article__foot">
+                <div>
+                  <span>КОНЕЦ ЗАПИСИ</span>
+                  <b>Долг всё ещё не закрыт.</b>
+                </div>
+                <button type="button" id="lore-top">↑ В начало</button>
+              </footer>
+            </article>
+          </div>
+
+          <div class="lore-beats reveal">
+            <div class="lore-beats__head">
+              <span>ХРОНОЛОГИЯ</span>
+              <b>ОДНА НОЧЬ, КОТОРАЯ СОЗДАЛА УБИЙЦУ</b>
+            </div>
+            <ol>
+              <li><span>01</span><b>ДОЛГ</b><p>Годами заброшенный код в штабе Roblox копится и однажды начинает хотеть.</p></li>
+              <li><span>02</span><b>ОБРЯД</b><p>Amarah превращает старую метку администраторов в выдуманного бога Спауна.</p></li>
+              <li><span>03</span><b>ЖЕРТВА</b><p>Two Time убивает Azure на поле ночной красавицы, чтобы тот вернулся.</p></li>
+              <li><span>04</span><b>ОШИБКА</b><p>Спаун молчит. Пластина под полем срабатывает сама и возвращает культиста к жизни.</p></li>
+              <li><span>05</span><b>РОЖДЕНИЕ</b><p>Из зазора между двумя ударами сердца выходит человек с циферблатом вместо лица.</p></li>
+              <li><span>06</span><b>СЧЁТ</b><p>Девять старейшин платят по секунде. Долг Amarah остаётся висеть на границе леса.</p></li>
+            </ol>
+          </div>
+
+          <section class="lore-links">
+            <div class="section-head reveal">
+              <div class="section-head__kicker"><i></i> СВЯЗИ</div>
+              <h2>Персонажи в этой истории</h2>
+              <p>Почти каждый, кого Хронос встречает в раунде, уже был в его стекле — или оставил там пустую строку.</p>
+            </div>
+            <div class="lore-links__grid">
+              <a class="lore-link reveal" href="#survivors/twotime">
+                <span class="lore-link__tag">SURVIVOR</span>
+                <h3>Two Time</h3>
+                <p>Культист, в чьей последней секунде живёт Хронос. Он молится богу, которого нет.</p>
+                <span class="lore-link__open">Открыть досье →</span>
+              </a>
+              <div class="lore-link lore-link--static reveal">
+                <span class="lore-link__tag">CULT · LOST</span>
+                <h3>Azure / Phosphorus</h3>
+                <p>Долг, который вернули без спроса. Хронос не простил этого ни ему, ни его хозяину.</p>
+              </div>
+              <div class="lore-link lore-link--static reveal">
+                <span class="lore-link__tag">CULT · DEBT</span>
+                <h3>Amarah</h3>
+                <p>Настоящий должник. Время не ищет виноватых, поэтому Хронос находит только Two Time.</p>
+              </div>
+              <div class="lore-link lore-link--static reveal">
+                <span class="lore-link__tag">ENTITY</span>
+                <h3>Спектр</h3>
+                <p>Хозяин игр. Не может прочитать Хроноса, потому что тот состоит из времени, которое не умеет считать.</p>
+              </div>
+              <a class="lore-link reveal" href="#killers/johndoe">
+                <span class="lore-link__tag">KILLER</span>
+                <h3>John Doe</h3>
+                <p>Первый носитель кода. Рядом с ним стрелки Хроноса сбиваются на 404.</p>
+                <span class="lore-link__open">Открыть досье →</span>
+              </a>
+              <div class="lore-link lore-link--static reveal">
+                <span class="lore-link__tag">INVESTIGATOR</span>
+                <h3>Jane Doe</h3>
+                <p>Её последняя секунда смотрит из трещины на стекле. Хронос не знает её имени.</p>
+              </div>
+              <a class="lore-link reveal" href="#survivors/shedletsky">
+                <span class="lore-link__tag">SURVIVOR</span>
+                <h3>Shedletsky</h3>
+                <p>Протянул ему куриную ножку. Просто так. Хронос до сих пор не знает, что с этим делать.</p>
+                <span class="lore-link__open">Открыть досье →</span>
+              </a>
+              <a class="lore-link reveal" href="#killers/1x1x1x1">
+                <span class="lore-link__tag">KILLER</span>
+                <h3>1x1x1x1</h3>
+                <p>Время без промежутка между секундами. Единственный, на кого не действует откат.</p>
+                <span class="lore-link__open">Открыть досье →</span>
+              </a>
+              <a class="lore-link reveal" href="#killers/slasher">
+                <span class="lore-link__tag">KILLER</span>
+                <h3>Slasher</h3>
+                <p>Тридцать секунд в узком коридоре, которые Хронос так и не смог внести в счёт.</p>
+                <span class="lore-link__open">Открыть досье →</span>
+              </a>
+              <a class="lore-link reveal" href="#survivors/j91nd">
+                <span class="lore-link__tag">SURVIVOR</span>
+                <h3>J91nD</h3>
+                <p>Единственный, кто честно просит у времени несколько секунд и платит вперёд.</p>
+                <span class="lore-link__open">Открыть досье →</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="lore-archive">
+            <div class="section-head reveal">
+              <div class="section-head__kicker"><i></i> АРХИВ</div>
+              <h2>Остальные досье</h2>
+              <p>Записи ещё не рассекречены. Как только появится текст — он встанет на это место.</p>
+            </div>
+            <div class="lore-archive__grid" id="lore-archive"></div>
+          </section>
+
+          <div class="note reveal">
+            <span class="note__mark">i</span>
+            Текст досье — авторский лор проекта. Файл доступен для скачивания в формате Markdown.
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ UPDATES ============ -->
+    <section class="tab-panel" id="tab-updates" data-panel="updates">
+      <div class="page-head page-head--updates">
+        <div class="page-head__bg" style="background-image:url('assets/chronos.png')"></div>
+        <div class="container page-head__inner">
+          <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ЖУРНАЛ</span><i>/</i><b>ПАТЧИ</b></div>
+          <h1 class="page-head__title" data-text="PATCHES">PATCHES</h1>
+          <p class="page-head__sub">24 сборки. Один длинный путь от FirstPerson до финального света.</p>
+          <div class="page-head__meta">
+            <span><b>24</b> сборки</span>
+            <span><b>1.0.23</b> текущая</span>
+            <span><b>SEASON 01</b> журнал</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section section--tight">
+        <div class="container">
+          <div class="update-now reveal">
+            <div class="update-now__left">
+              <div class="update-now__label"><i></i> CURRENT BUILD</div>
+              <div class="update-now__version">1.0.23</div>
+              <h2>Финальный свет</h2>
+              <p>Последняя сборка перед релизом: Atmosphere, Bloom и лёгкая цветокоррекция. Ниже — весь путь проекта по журналу изменений.</p>
+            </div>
+            <div class="update-now__right">
+              <div class="update-now__stat"><b>24</b><span>сборки</span></div>
+              <div class="update-now__stat"><b>05</b><span>вех</span></div>
+              <div class="update-now__stat"><b>23</b><span>патча</span></div>
+            </div>
+          </div>
+
+          <div class="milestones" id="milestones"></div>
+
+          <div class="toolbar reveal">
+            <div class="filters" id="update-filters">
+              <button class="chip is-active" data-filter="all">Все</button>
+              <button class="chip" data-filter="gameplay">Геймплей</button>
+              <button class="chip" data-filter="characters">Персонажи</button>
+              <button class="chip" data-filter="admin">Админ</button>
+              <button class="chip" data-filter="visual">Визуал</button>
+              <button class="chip" data-filter="tech">Техника</button>
+            </div>
+            <div class="toolbar__count"><b id="update-count">24</b> / 24</div>
+          </div>
+
+          <div class="devlog" id="update-list"></div>
+
+          <div class="note reveal">
+            <span class="note__mark">!</span>
+            Журнал собран из ChangeLog проекта. Формулировки сокращены и переведены на русский, технические детали сохранены.
+          </div>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand brand--footer">
+            <span class="brand__mark">
+              <svg viewBox="0 0 64 64" aria-hidden="true">
+                <path d="M32 3 57 17v30L32 61 7 47V17Z" />
+                <path d="M20 24c5-7 19-7 24 0M22 41c4 6 16 6 20 0" />
+              </svg>
+            </span>
+            <span class="brand__text">FORSAKEN<small>case file 001</small></span>
+          </div>
+          <p>Асимметричный хоррор в Roblox. Убийца уже здесь.<br>Вопрос только в том — где ты.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Досье</h4>
+          <button data-tab="killers">Убийцы</button>
+          <button data-tab="survivors">Выжившие</button>
+          <button data-tab="maps">Карты</button>
+          <button data-tab="items">Предметы</button>
+        </div>
+
+        <div class="footer-col">
+          <h4>Игра</h4>
+          <a href="https://www.roblox.com/games/100668519081940" target="_blank" rel="noopener">Roblox</a>
+          <button data-tab="mechanics">Механики</button>
+          <button data-tab="lore">Лор</button>
+          <a href="#home" data-tab="home">На главную</a>
+          <button data-tab="updates">Патчи</button>
+        </div>
+
+        <div class="footer-col footer-col--status">
+          <h4>Состояние</h4>
+          <div class="status-line"><i></i> Серверы: онлайн</div>
+          <div class="status-line"><i></i> Версия: 1.0.23</div>
+          <div class="status-line status-line--dev"><i></i> Walker: в разработке</div>
+          <div class="footer-note">FAN PROJECT · NON-COMMERCIAL</div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 FORSAKEN FAN SITE. Не связан с Roblox Corporation.</span>
+        <span class="footer-bottom__right">СДЕЛАНО С <b>♥</b> И БЕССОННИЦЕЙ</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ MODAL ============ -->
+  <div class="modal" id="char-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card">
+      <button class="modal__close" data-close aria-label="Закрыть">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div class="modal__media">
+        <div class="modal__media-bg" id="modal-bg"></div>
+        <img id="modal-img" src="" alt="">
+        <div class="modal__scan"></div>
+        <div class="modal__file">FILE // <span id="modal-file">000</span></div>
+      </div>
+      <div class="modal__body">
+        <div class="modal__top">
+          <div class="rarity" id="modal-rarity">COMMON</div>
+          <div class="modal__price" id="modal-price"></div>
+        </div>
+        <h2 id="modal-name">—</h2>
+        <p class="modal__quote" id="modal-quote"></p>
+        <p class="modal__desc" id="modal-desc"></p>
+
+        <div class="modal__stats" id="modal-stats"></div>
+
+        <div class="modal__profile">
+          <div class="modal__difficulty">
+            <span>СЛОЖНОСТЬ</span>
+            <div class="difficulty-dots" id="modal-difficulty"></div>
+          </div>
+          <div class="modal__tags" id="modal-tags"></div>
+        </div>
+
+        <div class="modal__section-title"><span>БОЕВОЙ ПРОФИЛЬ</span><i></i></div>
+        <div class="profile-grid">
+          <div class="profile-col">
+            <h5>СИЛЬНЫЕ СТОРОНЫ</h5>
+            <ul id="modal-strengths"></ul>
+          </div>
+          <div class="profile-col profile-col--weak">
+            <h5>СЛАБОСТИ</h5>
+            <ul id="modal-weaknesses"></ul>
+          </div>
+        </div>
+
+        <div class="modal__tip" id="modal-tip">
+          <b>СОВЕТ</b>
+          <p></p>
+        </div>
+
+        <div class="modal__section-title"><span>СПОСОБНОСТИ</span><i></i></div>
+        <div class="ability-list" id="modal-abilities"></div>
+
+        <div class="modal__credits" id="modal-credits"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MAP MODAL ============ -->
+  <div class="modal modal--map" id="map-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal__backdrop" data-close-map></div>
+    <div class="modal__card modal__card--map">
+      <button class="modal__close" data-close-map aria-label="Закрыть">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div class="map-modal__art" id="map-modal-art">
+        <img class="map-modal__photo" id="map-modal-photo" alt="">
+        <div class="map-card__grid"></div>
+        <div class="map-modal__scan"></div>
+        <span class="map-card__glyph" id="map-modal-glyph">B</span>
+        <div class="map-modal__coord">LOCATION // <span id="map-modal-coord">01</span></div>
+        <div class="map-modal__stamp">FORSAKEN ARCHIVE</div>
+      </div>
+      <div class="modal__body">
+        <div class="modal__top">
+          <div class="rarity rarity--common" id="map-modal-tag">В РОТАЦИИ</div>
+          <div class="modal__price" id="map-modal-num">01 / 10</div>
+        </div>
+        <h2 id="map-modal-name">—</h2>
+        <p class="modal__quote" id="map-modal-ru"></p>
+        <p class="modal__desc" id="map-modal-desc"></p>
+
+        <div class="modal__stats" id="map-modal-stats"></div>
+
+        <div class="modal__section-title"><span>ОСОБЕННОСТИ</span><i></i></div>
+        <ul class="map-features" id="map-modal-features"></ul>
+
+        <div class="modal__tip" id="map-modal-tip">
+          <b>СОВЕТ</b>
+          <p></p>
+        </div>
+
+        <div class="modal__credits" id="map-modal-credits"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/details.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
