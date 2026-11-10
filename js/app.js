@@ -1367,15 +1367,26 @@
       img.style.transform = "";
     });
 
-    // 3D tilt для карточек — делегирование, без множества обработчиков
-    const TILT_SEL = ".char-card, .map-card, .live-stat, .feature";
+    // 3D tilt для карточек — делегирование, мгновенный трекинг без задержки CSS
+    const TILT_SEL = ".char-card, .map-card, .live-stat, .feature, .role-card";
     let tiltEl = null;
+
+    const resetTilt = () => {
+      if (!tiltEl) return;
+      tiltEl.classList.remove("is-tilting");
+      tiltEl.style.transform = "";
+      tiltEl = null;
+    };
 
     document.addEventListener("pointermove", (e) => {
       const card = e.target.closest?.(TILT_SEL);
       if (card !== tiltEl) {
-        if (tiltEl) tiltEl.style.transform = "";
+        if (tiltEl) {
+          tiltEl.classList.remove("is-tilting");
+          tiltEl.style.transform = "";
+        }
         tiltEl = card;
+        if (card) card.classList.add("is-tilting");
       }
       if (!card) return;
 
@@ -1386,15 +1397,18 @@
       card.style.setProperty("--x", `${x * 100}%`);
       card.style.setProperty("--y", `${y * 100}%`);
 
-      const tiltX = (0.5 - y) * 9;
-      const tiltY = (x - 0.5) * 9;
-      card.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-5px) scale(1.01)`;
+      const tiltX = (0.5 - y) * 18;
+      const tiltY = (x - 0.5) * 18;
+      card.style.transform = `perspective(900px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateZ(8px) scale(1.02)`;
     }, { passive: true });
 
-    document.addEventListener("pointerleave", () => {
-      if (tiltEl) tiltEl.style.transform = "";
-      tiltEl = null;
+    document.addEventListener("pointerout", (e) => {
+      if (!tiltEl) return;
+      if (e.relatedTarget && tiltEl.contains(e.relatedTarget)) return;
+      if (e.target.closest?.(TILT_SEL) === tiltEl) resetTilt();
     }, true);
+
+    window.addEventListener("blur", resetTilt);
   };
 
   /* ---------- ambient sound ---------- */

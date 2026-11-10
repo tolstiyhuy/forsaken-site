@@ -1856,6 +1856,21 @@ ul, ol {
   opacity: 1;
 }
 
+/* мгновенный 3D-трекинг: отключаем плавный transition на transform */
+.char-card.is-tilting,
+.map-card.is-tilting,
+.feature.is-tilting,
+.live-stat.is-tilting,
+.role-card.is-tilting {
+  transition: border-color 0.3s, box-shadow 0.3s;
+  z-index: 3;
+  box-shadow: 0 26px 70px -22px color-mix(in srgb, var(--accent, #e01b24) 60%, transparent);
+}
+
+.char-card.is-tilting .char-card__img {
+  transition: filter 0.5s;
+}
+
 .char-card.is-filtered-out {
   display: none;
 }
