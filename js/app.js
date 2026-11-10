@@ -1323,6 +1323,26 @@
     requestAnimationFrame(loop);
   };
 
+  /* ---------- scroll progress ---------- */
+
+  const initScrollProgress = () => {
+    const bar = $("#scroll-progress-bar");
+    if (!bar) return;
+    let raf = null;
+    const update = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+      bar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      raf = null;
+    };
+    window.addEventListener("scroll", () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    }, { passive: true });
+    update();
+  };
+
   /* ---------- hero parallax ---------- */
 
   const initParallax = () => {
@@ -1347,38 +1367,34 @@
       img.style.transform = "";
     });
 
-    // 3D tilt для карточек
-    const initCardTilt = () => {
-      const cards = $$(".char-card, .feature, .map-card");
-      cards.forEach((card) => {
-        card.addEventListener("pointermove", (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width;
-          const y = (e.clientY - rect.top) / rect.height;
-          
-          card.style.setProperty("--x", `${x * 100}%`);
-          card.style.setProperty("--y", `${y * 100}%`);
-          
-          const tiltX = (y - 0.5) * 10;
-          const tiltY = (x - 0.5) * -10;
-          
-          card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-4px) scale(1.02)`;
-        });
+    // 3D tilt для карточек — делегирование, без множества обработчиков
+    const TILT_SEL = ".char-card, .map-card, .live-stat, .feature";
+    let tiltEl = null;
 
-        card.addEventListener("pointerleave", () => {
-          card.style.transform = "";
-        });
-      });
-    };
+    document.addEventListener("pointermove", (e) => {
+      const card = e.target.closest?.(TILT_SEL);
+      if (card !== tiltEl) {
+        if (tiltEl) tiltEl.style.transform = "";
+        tiltEl = card;
+      }
+      if (!card) return;
 
-    initCardTilt();
-    
-    // Observer для новых карточек
-    const observer = new MutationObserver(() => {
-      initCardTilt();
-    });
-    
-    observer.observe(document.body, { childList: true, subtree: true });
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      card.style.setProperty("--x", `${x * 100}%`);
+      card.style.setProperty("--y", `${y * 100}%`);
+
+      const tiltX = (0.5 - y) * 9;
+      const tiltY = (x - 0.5) * 9;
+      card.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-5px) scale(1.01)`;
+    }, { passive: true });
+
+    document.addEventListener("pointerleave", () => {
+      if (tiltEl) tiltEl.style.transform = "";
+      tiltEl = null;
+    }, true);
   };
 
   /* ---------- ambient sound ---------- */
@@ -1554,6 +1570,7 @@
     initCursor();
     initParallax();
     initSound();
+    initScrollProgress();
     animateCounters();
 
     const { tab, id } = readHash();
