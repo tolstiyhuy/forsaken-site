@@ -1529,21 +1529,17 @@
         if (!entry.isIntersecting || entry.target.dataset.animated) return;
         entry.target.dataset.animated = "true";
         const target = parseInt(entry.target.dataset.target);
-        const duration = 2000;
-        const step = target / (duration / 16);
-        let current = 0;
+        const duration = 1400;
+        const start = performance.now();
         
-        const animate = () => {
-          current += step;
-          if (current >= target) {
-            entry.target.textContent = target.toLocaleString("ru-RU");
-            return;
-          }
-          entry.target.textContent = Math.floor(current).toLocaleString("ru-RU");
-          requestAnimationFrame(animate);
+        const animate = (now) => {
+          const t = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          entry.target.textContent = Math.round(target * eased).toLocaleString("ru-RU");
+          if (t < 1) requestAnimationFrame(animate);
         };
         
-        animate();
+        requestAnimationFrame(animate);
       });
     }, { threshold: 0.5 });
     
