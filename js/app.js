@@ -1346,6 +1346,39 @@
     hero.addEventListener("pointerleave", () => {
       img.style.transform = "";
     });
+
+    // 3D tilt для карточек
+    const initCardTilt = () => {
+      const cards = $$(".char-card, .feature, .map-card");
+      cards.forEach((card) => {
+        card.addEventListener("pointermove", (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const y = (e.clientY - rect.top) / rect.height;
+          
+          card.style.setProperty("--x", `${x * 100}%`);
+          card.style.setProperty("--y", `${y * 100}%`);
+          
+          const tiltX = (y - 0.5) * 10;
+          const tiltY = (x - 0.5) * -10;
+          
+          card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-4px) scale(1.02)`;
+        });
+
+        card.addEventListener("pointerleave", () => {
+          card.style.transform = "";
+        });
+      });
+    };
+
+    initCardTilt();
+    
+    // Observer для новых карточек
+    const observer = new MutationObserver(() => {
+      initCardTilt();
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
   };
 
   /* ---------- ambient sound ---------- */
@@ -1473,6 +1506,34 @@
 
   /* ---------- boot ---------- */
 
+  const animateCounters = () => {
+    const counters = $$(".live-stat__value[data-target]");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting || entry.target.dataset.animated) return;
+        entry.target.dataset.animated = "true";
+        const target = parseInt(entry.target.dataset.target);
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
+        
+        const animate = () => {
+          current += step;
+          if (current >= target) {
+            entry.target.textContent = target.toLocaleString("ru-RU");
+            return;
+          }
+          entry.target.textContent = Math.floor(current).toLocaleString("ru-RU");
+          requestAnimationFrame(animate);
+        };
+        
+        animate();
+      });
+    }, { threshold: 0.5 });
+    
+    counters.forEach((counter) => observer.observe(counter));
+  };
+
   const boot = () => {
     renderCharacters();
     renderMaps();
@@ -1493,6 +1554,7 @@
     initCursor();
     initParallax();
     initSound();
+    animateCounters();
 
     const { tab, id } = readHash();
     setTab(tab, { updateHash: false, scroll: false });
