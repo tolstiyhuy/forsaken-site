@@ -11,11 +11,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=8">
   <!-- SHARED-HEAD:B — Chat 2 (визуал). Пиши ТОЛЬКО между своими маркерами. Одна строка = <link> или <meta>. -->
+  <link rel="stylesheet" href="css/v2.css?v=8">
+  <meta name="theme-color" content="#070708" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#e8ddc7" media="(prefers-color-scheme: light)">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FORSAKEN">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="FORSAKEN — архив дел Roblox-хоррора">
+  <meta property="og:description" content="Дело №001: досье убийц, выживших и локаций FORSAKEN. Карты, предметы, механики и архив лора — всё в одной читалке.">
+  <meta property="og:image" content="assets/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FORSAKEN — ДЕЛО №001. Хронос с часами вместо лица.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FORSAKEN — архив дел Roblox-хоррора">
+  <meta name="twitter:description" content="Досье убийц, выживших и локаций FORSAKEN: карты, предметы, механики и лор.">
+  <meta name="twitter:image" content="assets/og-cover.png">
   <!-- /SHARED-HEAD:B -->
   <!-- SHARED-HEAD:C — Chat 3 (фичи). Пиши ТОЛЬКО между своими маркерами. Одна строка = <script> или <link>. -->
   <!-- /SHARED-HEAD:C -->
 </head>
 <body class="is-loading">
+
+  <a class="v2-skip" href="#main">Перейти к содержимому</a>
 
   <div class="preloader" id="preloader" aria-hidden="true">
     <div class="preloader__inner">
@@ -80,11 +98,24 @@
 
     <!-- ============ HOME ============ -->
     <section class="tab-panel is-active" id="tab-home" data-panel="home">
-      <div class="hero">
+      <div class="hero v2-hero">
+        <div class="v2-hero__layer v2-hero__layer--grid" aria-hidden="true"></div>
+
         <div class="hero__art">
           <div class="hero__glow"></div>
           <img src="assets/johndoe.png" alt="John Doe" class="hero__img" id="hero-img">
           <div class="hero__art-fade"></div>
+        </div>
+
+        <div class="v2-hero__layer v2-hero__layer--fog" aria-hidden="true"><i></i><i></i></div>
+
+        <div class="v2-hero__rail" aria-hidden="true">
+          <span class="v2-hero__case">CASE FILE 001 · ОТКРЫТО 14.11.2026</span>
+        </div>
+
+        <div class="v2-hero__stamp" aria-hidden="true">
+          <span class="v2-stamp v2-stamp--case">ДЕЛО №001</span>
+          <span class="v2-hero__stamp-meta">АРХИВ · ФОНД FORSAKEN · 2026</span>
         </div>
 
         <div class="container hero__content">
@@ -96,6 +127,7 @@
           </div>
 
           <h1 class="hero__title" data-text="FORSAKEN">FORSAKEN</h1>
+          <div class="v2-hero__rule" aria-hidden="true"><i></i><span>01</span></div>
 
           <p class="hero__sub reveal">
             Один убийца. Четверо выживших.<br>
@@ -410,8 +442,10 @@
 
     <!-- ============ KILLERS ============ -->
     <section class="tab-panel" id="tab-killers" data-panel="killers">
-      <div class="page-head">
+      <div class="page-head page-head--killers v2-head v2-head--killers">
         <div class="page-head__bg" style="background-image:url('assets/johndoe.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>ДЕЛО</b> КРИМИНАЛЬНОЕ · 07</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ДОСЬЕ</span><i>/</i><b>УБИЙЦЫ</b></div>
           <h1 class="page-head__title" data-text="KILLERS">KILLERS</h1>
@@ -472,8 +506,10 @@
 
     <!-- ============ SURVIVORS ============ -->
     <section class="tab-panel" id="tab-survivors" data-panel="survivors">
-      <div class="page-head page-head--survivors">
+      <div class="page-head page-head--survivors v2-head v2-head--survivors">
         <div class="page-head__bg" style="background-image:url('assets/twotime.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>БИРКА</b> ЛАТУНЬ · 03</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ДОСЬЕ</span><i>/</i><b>ВЫЖИВШИЕ</b></div>
           <h1 class="page-head__title" data-text="SURVIVORS">SURVIVORS</h1>
@@ -500,8 +536,10 @@
 
     <!-- ============ MAPS ============ -->
     <section class="tab-panel" id="tab-maps" data-panel="maps">
-      <div class="page-head page-head--maps">
+      <div class="page-head page-head--maps v2-head v2-head--maps">
         <div class="page-head__bg" style="background-image:url('assets/slasher.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>СХЕМА</b> СЕКТОР B-10 · N 54°58′</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ЛОКАЦИИ</span><i>/</i><b>КАРТЫ</b></div>
           <h1 class="page-head__title" data-text="MAPS">MAPS</h1>
@@ -527,8 +565,10 @@
 
     <!-- ============ ITEMS ============ -->
     <section class="tab-panel" id="tab-items" data-panel="items">
-      <div class="page-head page-head--items">
+      <div class="page-head page-head--items v2-head v2-head--items">
         <div class="page-head__bg" style="background-image:url('assets/j91nd.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>СКЛАД</b> ИНВ. № M-0141 · 01 ЯЩИК</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ИНВЕНТАРЬ</span><i>/</i><b>ПРЕДМЕТЫ</b></div>
           <h1 class="page-head__title" data-text="ITEMS">ITEMS</h1>
@@ -641,8 +681,10 @@
 
     <!-- ============ MECHANICS ============ -->
     <section class="tab-panel" id="tab-mechanics" data-panel="mechanics">
-      <div class="page-head page-head--mechanics">
+      <div class="page-head page-head--mechanics v2-head v2-head--mechanics">
         <div class="page-head__bg" style="background-image:url('assets/chronos.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>ЧЕРТЁЖ</b> ЛИСТ 06 · МАСШТАБ 1:1</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ГАЙД</span><i>/</i><b>МЕХАНИКИ</b></div>
           <h1 class="page-head__title" data-text="MECHANICS">MECHANICS</h1>
@@ -824,8 +866,10 @@
 
     <!-- ============ LORE ============ -->
     <section class="tab-panel" id="tab-lore" data-panel="lore">
-      <div class="page-head page-head--lore">
+      <div class="page-head page-head--lore v2-head v2-head--lore">
         <div class="page-head__bg" style="background-image:url('assets/chronos.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>КАРТОТЕКА</b> ФОНД 01 · ЯЩИК 3</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>АРХИВ</span><i>/</i><b>ЛОР</b></div>
           <h1 class="page-head__title" data-text="LORE">LORE</h1>
@@ -961,6 +1005,7 @@
 
             <article class="lore-article reveal" id="lore-article">
               <header class="lore-article__head">
+                <span class="v2-stamp v2-stamp--secret lore-article__stamp" aria-hidden="true">ЗАСЕКРЕЧЕНО</span>
                 <div class="lore-article__file" id="lore-article-file">ЛОР-ДОСЬЕ // LR-001</div>
                 <h2 id="lore-article-title">Хронос</h2>
                 <p id="lore-article-sub">Он и есть та самая лишняя секунда.</p>
@@ -968,6 +1013,12 @@
                   <span>13 ГЛАВ</span>
                   <span>≈ 25 МИН ЧТЕНИЯ</span>
                   <span>СПОЙЛЕРЫ</span>
+                </div>
+                <div class="v2-legend" aria-label="Уровни достоверности записей архива">
+                  <span class="v2-legend__cap">ДОСТОВЕРНОСТЬ:</span>
+                  <span class="v2-cred v2-cred--canon">КАНОН</span>
+                  <span class="v2-cred v2-cred--witness">СВИДЕТЕЛЬСТВО</span>
+                  <span class="v2-cred v2-cred--rumor">СЛУХ</span>
                 </div>
                 <a class="lore-article__download" id="lore-download" href="lore/chronos.md" download="Chronos_lore_final.md">Скачать .md</a>
               </header>
@@ -1098,8 +1149,10 @@
 
     <!-- ============ UPDATES ============ -->
     <section class="tab-panel" id="tab-updates" data-panel="updates">
-      <div class="page-head page-head--updates">
+      <div class="page-head page-head--updates v2-head v2-head--updates">
         <div class="page-head__bg" style="background-image:url('assets/chronos.png')"></div>
+        <div class="v2-head__deco" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="v2-head__label"><b>ТЕЛЕТАЙП</b> КАНАЛ 1.0.23 · 24 СБОРКИ</span>
         <div class="container page-head__inner">
           <div class="breadcrumbs"><span>FORSAKEN</span><i>/</i><span>ЖУРНАЛ</span><i>/</i><b>ПАТЧИ</b></div>
           <h1 class="page-head__title" data-text="PATCHES">PATCHES</h1>
@@ -1300,6 +1353,10 @@
   </div>
 
   <!-- SHARED-BODY:B — Chat 2 (визуал). Новые слои/секции/оверлеи только здесь. -->
+  <div class="v2-print-head" aria-hidden="true">
+    <span>FORSAKEN · FAN ARCHIVE · ДЕЛО №001</span>
+    <span>ПЕЧАТЬ АРХИВА · НЕ ДЛЯ РАСПРОСТРАНЕНИЯ</span>
+  </div>
   <!-- /SHARED-BODY:B -->
 
   <!-- SHARED-BODY:C — Chat 3 (фичи). Новые контейнеры/диалоги только здесь. -->
