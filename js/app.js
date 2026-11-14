@@ -613,7 +613,14 @@
       return `<a class="fx-lore-link${pending ? " fx-lore-link--pending" : ""}" href="#/lore/${record}" data-fx-record="${record}">${record}</a>`;
     });
 
-  const inlineLore = (text) => linkifyLoreRecords(escapeHTML(text).replace(/\*([^*]+)\*/g, "<em>$1</em>"));
+  const inlineLore = (text) =>
+    linkifyLoreRecords(
+      escapeHTML(text)
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+        /* F-24: [00:14] и ~~зачёркнуто~~ из шаблона лора (L-23) */
+        .replace(/\[\d{2}:\d{2}\]/g, (m) => `<span class="fx-timecode">${m}</span>`)
+        .replace(/~~([^~]+)~~/g, "<s>$1</s>")
+    );
 
   const parseLoreText = (text, doc) => {
     if (doc.chapters) {
@@ -2177,6 +2184,38 @@
     archive: () => LORE_ARCHIVE.slice(),
     byRecord: (record) => LORE_BY_RECORD.get(String(record || "").toUpperCase()) || null,
     docKeyFor: loreDocKeyFor,
+    /* F-07: открыто ли досье и, если закрыто, чем именно его рассекречивают */
+    isUnlocked: (idOrRecord) => {
+      const key = loreDocKeyFor(idOrRecord);
+      return !!key && isLoreDocUnlocked(key);
+    },
+    isRead: (idOrRecord) => {
+      const key = loreDocKeyFor(idOrRecord);
+      return !!key && isLoreRead(key);
+    },
+    /* F-17: подгрузить следующее досье заранее — в тот же кэш читалки */
+    prefetch: (idOrRecord) => {
+      const key = loreDocKeyFor(idOrRecord);
+      if (!key || loreCache[key]) return;
+      const doc = LORE_DOCS[key];
+      if (!doc || !isLoreDocUnlocked(key)) return;
+      fetch(doc.file, { cache: "no-cache" })
+        .then((res) => (res.ok ? res.text() : ""))
+        .then((text) => {
+          if (!text || loreCache[key]) return;
+          const chapters = parseLoreText(text, doc);
+          if (!chapters.length || chapters.some((ch) => !ch.paras.length)) return;
+          loreCache[key] = { chapters, html: loreChaptersHTML(chapters) };
+        })
+        .catch(() => {});
+    },
+    unlockHint: (idOrRecord) => {
+      const key = loreDocKeyFor(idOrRecord);
+      const gate = key ? LORE_GATES[key] : null;
+      const req = gate ? LORE_DOCS[gate.requires] : null;
+      if (!req) return null;
+      return { doc: gate.requires, record: req.record || gate.requires, name: req.name };
+    },
     openChapter: (chapterId) => {
       if (!loreView.doc) return false;
       const cached = loreCache[loreView.doc];

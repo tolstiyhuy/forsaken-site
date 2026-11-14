@@ -582,6 +582,234 @@
   };
 
   /* ============================================================
+     F-07: «читать по порядку» — следующая запись рекомендации
+     ============================================================ */
+
+  const ORDER_NODE_ID = "fx-lore-order";
+
+  const ensureOrderNode = () => {
+    let node = $("#" + ORDER_NODE_ID);
+    if (node) return node;
+    const anchor = $("#fx-related") || $("#lore-content");
+    if (!anchor) return null;
+    node = document.createElement("div");
+    node.className = "fx-order";
+    node.id = ORDER_NODE_ID;
+    node.hidden = true;
+    anchor.insertAdjacentElement("afterend", node);
+    return node;
+  };
+
+  const paintLoreOrder = () => {
+    const fx = FX();
+    const node = ensureOrderNode();
+    if (!fx || !node) return;
+    const key = fx.currentDoc();
+    if (!key) {
+      node.hidden = true;
+      node.innerHTML = "";
+      return;
+    }
+
+    /* порядок рекомендации = порядок записей в манифесте */
+    const archive = fx.archive();
+    const pos = archive.findIndex((entry) => entry.doc === key);
+    const next = pos >= 0 ? archive.slice(pos + 1).find((entry) => entry.doc) : null;
+
+    node.hidden = false;
+    if (!next) {
+      node.innerHTML = `<span class="fx-order__label">ПОРЯДОК ЧТЕНИЯ</span>
+        <p class="fx-order__text">Дальше по рекомендации ничего нет — это последняя запись архива.</p>`;
+      return;
+    }
+
+    if (fx.isUnlocked(next.doc)) {
+      /* F-17: следующая запись подгружается заранее, чтобы переход был мгновенным */
+      fx.prefetch(next.doc);
+      node.innerHTML = `<span class="fx-order__label">ПОРЯДОК ЧТЕНИЯ</span>
+        <a class="fx-order__btn" href="${fx.hash.lore(next.doc)}">
+          <b>${next.record} · ${escapeHTML(next.name)}</b>
+          <span>Следующая запись →</span>
+        </a>`;
+      return;
+    }
+
+    const hint = fx.unlockHint(next.doc);
+    const reqName = escapeHTML(hint ? hint.name : "предыдущего досье");
+    const head = `<span class="fx-order__label">ПОРЯДОК ЧТЕНИЯ</span>`;
+    /* требуемое досье совпадает с открытым — подсказываем дочитать его, а не ссылаемся в пустоту */
+    if (!hint || hint.doc === key) {
+      node.innerHTML = `${head}
+        <div class="fx-order__btn is-locked">
+          <b>${next.record} · ${escapeHTML(next.name)}</b>
+          <span>Откроется после «${reqName}»</span>
+        </div>`;
+      return;
+    }
+    node.innerHTML = `${head}
+      <a class="fx-order__btn is-locked" href="${fx.hash.lore(hint.doc)}">
+        <b>${next.record} · ${escapeHTML(next.name)}</b>
+        <span>Откроется после «${reqName}»</span>
+      </a>`;
+  };
+
+  /* ============================================================
+     F-05: карта архива — граф связей (SVG, без библиотек)
+     ============================================================ */
+
+  const GRAPH_ID = "fx-graph";
+  const GRAPH_W = 840;
+  const GRAPH_H = 480;
+
+  const graphSection = () => {
+    let section = $("#" + GRAPH_ID);
+    if (section) return section;
+    const archive = $(".lore-archive", $("#tab-lore"));
+    if (!archive) return null;
+    section = document.createElement("section");
+    section.className = "fx-graph";
+    section.id = GRAPH_ID;
+    section.innerHTML = `
+      <div class="section-head reveal">
+        <div class="section-head__kicker"><i></i> АРХИВ · СВЯЗИ</div>
+        <h2>Карта архива</h2>
+        <p>Кто с кем связан. Наведи на узел — подсветятся его связи, нажми — откроется досье.</p>
+      </div>
+      <div class="fx-graph__stage">
+        <svg class="fx-graph__svg" viewBox="0 0 ${GRAPH_W} ${GRAPH_H}" role="img" aria-label="Граф связей досье архива" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <p class="fx-graph__legend">
+        <span class="fx-graph__key is-read"><i></i>прочитано</span>
+        <span class="fx-graph__key is-open"><i></i>открыто</span>
+        <span class="fx-graph__key is-locked"><i></i>засекречено</span>
+      </p>`;
+    archive.insertAdjacentElement("afterend", section);
+    return section;
+  };
+
+  const shortName = (name) => {
+    const text = String(name || "");
+    return text.length > 14 ? text.slice(0, 13).trimEnd() + "…" : text;
+  };
+
+  const paintGraph = () => {
+    const fx = FX();
+    const section = graphSection();
+    if (!fx || !section) return;
+    const svg = $(".fx-graph__svg", section);
+    const nodes = fx.archive();
+    if (!svg || !nodes.length) return;
+
+    const cx = GRAPH_W / 2;
+    const cy = GRAPH_H / 2;
+    const rx = GRAPH_W / 2 - 78;
+    const ry = GRAPH_H / 2 - 62;
+    const points = new Map();
+    nodes.forEach((entry, i) => {
+      const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
+      points.set(entry.record, {
+        x: cx + Math.cos(angle) * rx,
+        y: cy + Math.sin(angle) * ry
+      });
+    });
+
+    /* рёбра: related из манифеста, дубликаты (A→B и B→A) сводим к одному */
+    const edges = [];
+    const seen = new Set();
+    nodes.forEach((entry) => {
+      (entry.related || []).forEach((rec) => {
+        if (rec === entry.record || !points.has(rec)) return;
+        const key = [entry.record, rec].sort().join("|");
+        if (seen.has(key)) return;
+        seen.add(key);
+        edges.push({ key, a: entry.record, b: rec });
+      });
+    });
+
+    const stateOf = (entry) => {
+      if (!entry.doc) return "is-pending";
+      if (fx.isRead(entry.record)) return "is-read";
+      if (fx.isUnlocked(entry.record)) return "is-open";
+      return "is-locked";
+    };
+
+    const edgesHTML = edges
+      .map((edge) => {
+        const a = points.get(edge.a);
+        const b = points.get(edge.b);
+        return `<line class="fx-graph__edge" data-a="${edge.a}" data-b="${edge.b}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`;
+      })
+      .join("");
+
+    const nodesHTML = nodes
+      .map((entry) => {
+        const point = points.get(entry.record);
+        const state = stateOf(entry);
+        const label = `${entry.record} · ${entry.name}`;
+        return `<g class="fx-graph__node ${state}" data-record="${entry.record}" data-doc="${entry.doc || ""}"
+                   transform="translate(${point.x.toFixed(1)} ${point.y.toFixed(1)})"
+                   tabindex="0" role="button" aria-label="Досье ${escapeHTML(label)}">
+          <title>${escapeHTML(label)}</title>
+          <circle r="31"></circle>
+          <text class="fx-graph__code" y="-3">${escapeHTML(entry.record)}</text>
+          <text class="fx-graph__name" y="13">${escapeHTML(shortName(entry.name))}</text>
+        </g>`;
+      })
+      .join("");
+
+    svg.innerHTML = `<g class="fx-graph__edges">${edgesHTML}</g><g class="fx-graph__nodes">${nodesHTML}</g>`;
+  };
+
+  const initGraph = () => {
+    paintGraph();
+    const section = $("#" + GRAPH_ID);
+    if (!section || section.dataset.fxBound) return;
+    section.dataset.fxBound = "1";
+
+    const svg = $(".fx-graph__svg", section);
+    const focusNode = (record) => {
+      if (!svg) return;
+      const hot = !!record;
+      svg.classList.toggle("is-focus", hot);
+      $$(".fx-graph__node", svg).forEach((node) => {
+        node.classList.toggle("is-hot", hot && node.dataset.record === record);
+      });
+      $$(".fx-graph__edge", svg).forEach((edge) => {
+        edge.classList.toggle("is-hot", hot && (edge.dataset.a === record || edge.dataset.b === record));
+      });
+    };
+
+    const hotOf = (target) => {
+      const node = target.closest && target.closest(".fx-graph__node");
+      return node ? node.dataset.record : null;
+    };
+
+    section.addEventListener("pointerover", (e) => focusNode(hotOf(e.target)));
+    section.addEventListener("focusin", (e) => focusNode(hotOf(e.target)));
+    section.addEventListener("pointerout", (e) => {
+      if (!e.relatedTarget || !hotOf(e.relatedTarget)) focusNode(null);
+    });
+    section.addEventListener("focusout", () => focusNode(null));
+
+    const open = (node) => {
+      if (!node) return;
+      const fx = FX();
+      if (!fx) return;
+      /* openDoc сам объяснит: засекречено, закрыто гейтом или ещё не готово */
+      fx.openDoc(node.dataset.doc || node.dataset.record);
+    };
+
+    section.addEventListener("click", (e) => open(e.target.closest(".fx-graph__node")));
+    section.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const node = e.target.closest(".fx-graph__node");
+      if (!node) return;
+      e.preventDefault();
+      open(node);
+    });
+  };
+
+  /* ============================================================
      wiring
      ============================================================ */
 
@@ -589,17 +817,27 @@
     initPalette();
     initLoreSearch();
     paintHomePanel();
+    paintLoreOrder();
+    initGraph();
     initFilterPersistence();
     restoreFilters();
 
-    document.addEventListener("fx:progress", paintHomePanel);
+    document.addEventListener("fx:progress", () => {
+      paintHomePanel();
+      paintGraph();
+    });
     document.addEventListener("fx:doc", () => {
+      paintLoreOrder();
       /* дома обновляем «продолжить чтение» только когда вкладка реально видна */
       if (FX() && FX().currentTab() === "home") paintHomePanel();
     });
     document.addEventListener("fx:tab", (e) => {
       if (e.detail && e.detail.tab === "home") paintHomePanel();
-      if (e.detail && e.detail.tab === "lore") initLoreSearch();
+      if (e.detail && e.detail.tab === "lore") {
+        initLoreSearch();
+        paintLoreOrder();
+        initGraph();
+      }
     });
 
     paintHomePanel();
