@@ -67,6 +67,25 @@
     { "id": "adminjohndoe", "record": "LR-010", "name": "Admin John Doe", "role": "KILLER",   "cat": "characters", "file": null, "status": "planned", "teaser": "Истинный испорченный код.",                   "requires": "place", "related": ["LR-003", "LR-001"] },
     { "id": "timeline",     "record": "LR-011", "name": "Хронология",     "role": "ARCHIVE",  "cat": "other",      "file": null, "status": "planned", "teaser": "Одна ночь, поле и всё, что случилось после.", "requires": "place", "related": ["LR-001", "LR-000"] },
     { "id": "rules",        "record": "LR-012", "name": "Правила раунда", "role": "ARCHIVE",  "cat": "other",      "file": null, "status": "planned", "teaser": "Свод законов места, записанный со слов выживших.", "requires": "place", "related": ["LR-000", "LR-011"] },
-    { "id": "glossary",     "record": "LR-013", "name": "Словарь архива","role": "ARCHIVE",  "cat": "other",      "file": null, "status": "planned", "teaser": "Секунда, долг, шов, квитанция. Как это называть.", "requires": "place", "related": ["LR-000"] }
+    {
+      "id": "glossary",
+      "record": "LR-013",
+      "name": "Словарь архива",
+      "role": "ARCHIVE",
+      "cat": "other",
+      "file": "lore/lr-013-glossary.md",
+      "status": "ready",
+      "teaser": "Секунда, долг, шов, квитанция. Как это называть.",
+      "sub": "Пока слова не сведены к списку, запись читается как чужая речь.",
+      "fileLabel": "ЛОР-ДОСЬЕ // LR-013",
+      "meta": ["5 ГЛАВ", "≈ 7 МИН ЧТЕНИЯ", "КАНОН"],
+      "foot": "Слово без статьи — ошибка пишущего.",
+      "tocFoot": "СЛОВАРЬ АРХИВА · LR-013",
+      "download": "LR-013_Glossary.md",
+      "requires": "place",
+      "related": ["LR-000", "LR-012", "LR-011", "LR-002"],
+      "mode": "markers",
+      "chapters": "auto"
+    }
   ]
 }
