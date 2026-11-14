@@ -144,6 +144,27 @@
       });
     });
 
+    (site().items || []).forEach((item) => {
+      const entry = item.ownerRecord ? fx.byRecord(item.ownerRecord) : null;
+      const docKey = entry && entry.doc;
+      items.push({
+        id: `item-${item.id}`,
+        kind: "ITEM",
+        title: `${item.code} · ${item.name}`,
+        sub: docKey ? `ВЕЩДОК · ${item.owner}` : `ВЕЩДОК БЕЗ ДЕЛА · ${item.owner}`,
+        haystack: norm(`${item.code} ${item.name} ${item.hint} вещдок предмет item ${item.owner} ${item.origin} ${item.anchor}`),
+        run: () => {
+          if (docKey) {
+            fx.tab("lore");
+            fx.openDoc(item.ownerRecord);
+          } else {
+            fx.tab("items");
+            fx.toast(`ВЕЩДОК ${item.code} · ДЕЛО НЕ ЗАВЕДЕНО`);
+          }
+        }
+      });
+    });
+
     fx.archive().forEach((entry) => {
       const open = !!entry.doc;
       items.push({
@@ -611,8 +632,8 @@
       return;
     }
 
-    /* порядок рекомендации = порядок записей в манифесте */
-    const archive = fx.archive();
+    /* порядок рекомендации — lore/CANON.md §10, его отдаёт FX.order() */
+    const archive = fx.order();
     const pos = archive.findIndex((entry) => entry.doc === key);
     const next = pos >= 0 ? archive.slice(pos + 1).find((entry) => entry.doc) : null;
 
@@ -810,6 +831,172 @@
   };
 
   /* ============================================================
+     F-12: предметы-улики из данных (lore/CANON.md §9)
+     ============================================================ */
+
+  const EVIDENCE_ID = "fx-evidence";
+
+  const itemsOf = () => {
+    const data = site();
+    return Array.isArray(data.items) ? data.items : [];
+  };
+
+  const evidenceSection = () => {
+    let section = $("#" + EVIDENCE_ID);
+    if (section) return section;
+    const tab = $("#tab-items");
+    if (!tab) return null;
+    section = document.createElement("div");
+    section.className = "fx-evidence";
+    section.id = EVIDENCE_ID;
+    section.innerHTML = `
+      <div class="section-head section-head--small reveal">
+        <div class="section-head__index">ВЕЩДОКИ <span>/</span> ${String(itemsOf().length).padStart(2, "0")} ШТ</div>
+        <h2 class="section-head__title">Предметы как <span>улики</span></h2>
+        <p class="section-head__text">Каждый предмет с номером привязан к досье. Нажми на номер дела, чтобы открыть запись.</p>
+      </div>
+      <div class="fx-evidence__bar" id="fx-evidence-bar">
+        <label class="fx-evidence__search">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 18 18"/></svg>
+          <input id="fx-evidence-input" type="search" placeholder="Поиск по вещдокам…" autocomplete="off" spellcheck="false" aria-label="Поиск по вещдокам">
+        </label>
+        <span class="fx-evidence__count" id="fx-evidence-count" role="status" aria-live="polite"></span>
+      </div>
+      <div class="fx-evidence__grid" id="fx-evidence-grid"></div>
+      <p class="fx-evidence__hint">Правило канона: предмет без номера — не улика.</p>`;
+
+    const anchor = $(".locked-grid", tab);
+    const head = $(".section-head--small", tab);
+    if (anchor) anchor.insertAdjacentElement("beforebegin", section);
+    else if (head) head.insertAdjacentElement("beforebegin", section);
+    else tab.appendChild(section);
+    return section;
+  };
+
+  const evidenceCardHTML = (item) => {
+    const fx = FX();
+    const linked = item.ownerRecord && fx && fx.byRecord(item.ownerRecord) && fx.byRecord(item.ownerRecord).doc;
+    const href = linked ? fx.hash.lore(fx.byRecord(item.ownerRecord).doc) : "";
+    const owner = linked
+      ? `<a class="fx-evidence__owner" href="${href}">${escapeHTML(item.owner)}</a>`
+      : `<span class="fx-evidence__owner is-quiet">${escapeHTML(item.owner)}</span>`;
+    return `
+      <article class="fx-evidence__card" data-haystack="${escapeHTML(
+        norm([item.code, item.name, item.hint, item.owner, item.origin, item.anchor].join(" "))
+      )}">
+        <span class="fx-evidence__code">${escapeHTML(item.code)}</span>
+        <h3>${escapeHTML(item.name)}${item.hint ? ` <small>${escapeHTML(item.hint)}</small>` : ""}</h3>
+        <dl>
+          <dt>Чей</dt><dd>${owner}</dd>
+          <dt>Откуда</dt><dd>${escapeHTML(item.origin)}</dd>
+          <dt>Якорь</dt><dd>${escapeHTML(item.anchor)}</dd>
+        </dl>
+      </article>`;
+  };
+
+  const paintEvidence = () => {
+    const section = evidenceSection();
+    if (!section) return;
+    const grid = $("#fx-evidence-grid", section);
+    const count = $("#fx-evidence-count", section);
+    const input = $("#fx-evidence-input", section);
+    if (!grid) return;
+    const items = itemsOf();
+    if (!items.length) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    grid.innerHTML = items.map(evidenceCardHTML).join("");
+
+    const apply = (query) => {
+      const needle = norm(query);
+      let shown = 0;
+      $$(".fx-evidence__card", grid).forEach((card) => {
+        const match = !needle || card.dataset.haystack.includes(needle);
+        card.hidden = !match;
+        if (match) shown += 1;
+      });
+      if (count) count.textContent = `${shown} / ${items.length}`;
+    };
+    apply(input ? input.value : "");
+  };
+
+  const initEvidence = () => {
+    paintEvidence();
+    const section = $("#" + EVIDENCE_ID);
+    if (!section || section.dataset.fxBound) return;
+    section.dataset.fxBound = "1";
+    const input = $("#fx-evidence-input", section);
+    input?.addEventListener("input", () => paintEvidence());
+  };
+
+  /* ============================================================
+     F-13: фильтры карт (есть дело / тип локации)
+     ============================================================ */
+
+  const MAP_FILTERS = [
+    { id: "all", label: "Все" },
+    { id: "case", label: "С делом" },
+    { id: "Открытая", label: "Открытые" },
+    { id: "Закрытая", label: "Закрытые" },
+    { id: "Смешанная", label: "Смешанные" },
+    { id: "Тестовая", label: "Тестовые" }
+  ];
+
+  const initMapFilters = () => {
+    const tab = $("#tab-maps");
+    const grid = $("#maps-grid");
+    if (!tab || !grid || $("#fx-map-filters")) return;
+
+    const bar = document.createElement("div");
+    bar.className = "fx-filters fx-filters--maps";
+    bar.id = "fx-map-filters";
+    bar.setAttribute("role", "group");
+    bar.setAttribute("aria-label", "Фильтр локаций");
+    bar.innerHTML = MAP_FILTERS.map(
+      (f, i) =>
+        `<button class="fx-filter${i === 0 ? " is-active" : ""}" type="button" data-fx-map-filter="${f.id}" aria-pressed="${i === 0}">${f.label}</button>`
+    ).join("");
+    grid.insertAdjacentElement("beforebegin", bar);
+
+    const apply = (id) => {
+      const maps = (typeof SITE_DATA !== "undefined" && SITE_DATA.maps) || [];
+      $$(".map-card", grid).forEach((card) => {
+        const map = maps.find((m) => m.id === card.dataset.id);
+        if (!map) return;
+        const match = id === "all" || (id === "case" ? !!map.case : map.type === id);
+        card.classList.toggle("is-filtered-out", !match);
+      });
+    };
+
+    bar.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-fx-map-filter]");
+      if (!btn) return;
+      $$(".fx-filter", bar).forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      apply(btn.dataset.fxMapFilter);
+    });
+  };
+
+  /* F-17: наведение на карточку — заранее тянем её досье */
+  const initPrefetch = () => {
+    const fx = FX();
+    if (!fx || !fx.prefetch) return;
+    document.addEventListener(
+      "pointerover",
+      (e) => {
+        const loreCard = e.target.closest("[data-lore-open]");
+        if (loreCard) fx.prefetch(loreCard.dataset.loreOpen);
+      },
+      { passive: true }
+    );
+  };
+
+  /* ============================================================
      wiring
      ============================================================ */
 
@@ -819,6 +1006,9 @@
     paintHomePanel();
     paintLoreOrder();
     initGraph();
+    initEvidence();
+    initMapFilters();
+    initPrefetch();
     initFilterPersistence();
     restoreFilters();
 
@@ -838,6 +1028,8 @@
         paintLoreOrder();
         initGraph();
       }
+      if (e.detail && e.detail.tab === "items") initEvidence();
+      if (e.detail && e.detail.tab === "maps") initMapFilters();
     });
 
     paintHomePanel();

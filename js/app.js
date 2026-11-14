@@ -91,6 +91,7 @@
       </div>
       <div class="map-card__top">
         <span class="map-card__tag ${map.tag === "DEV" ? "is-dev" : ""}">${map.tag}</span>
+        ${map.case ? `<span class="map-card__case" title="${map.caseNote || ""}">${map.case}</span>` : ""}
         <span class="map-card__num">${String(i + 1).padStart(2, "0")} / ${String(SITE_DATA.maps.length).padStart(2, "0")}</span>
       </div>
       <div class="map-card__body">
@@ -101,6 +102,7 @@
           <span>${map.type}</span>
           <span>${map.size || "MEDIUM"}</span>
           <span class="map-card__danger">ОПАСНОСТЬ ${"●".repeat(map.danger) || "—"}${"○".repeat(Math.max(0, 5 - map.danger))}</span>
+          ${map.case ? `<span class="fx-map-tag">ДЕЛО ${map.case}</span>` : ""}
         </div>
         <div class="map-card__open">
           <span>Открыть локацию</span>
@@ -398,6 +400,14 @@
   };
 
   const LORE_CATS = ["characters", "place", "other"];
+
+  /* F-07: рекомендованный порядок чтения — lore/CANON.md, раздел 10
+     (владелец данных: Chat 1). Формально хардкод, но один список на весь сайт.
+     Когда Chat 1 положит порядок в manifest.json, эта константа станет fallback. */
+  const LORE_READING_ORDER = [
+    "LR-001", "LR-000", "LR-013", "LR-012", "LR-002", "LR-005", "LR-011",
+    "LR-004", "LR-006", "LR-003", "LR-010", "LR-007", "LR-008", "LR-009"
+  ];
 
   const buildLoreRelated = (archive) => {
     const edges = new Map();
@@ -1744,6 +1754,20 @@
     $("#map-modal-ru", mapModal).textContent = map.ru;
     $("#map-modal-desc", mapModal).textContent = map.desc;
 
+    let caseEl = $("#map-modal-case", mapModal);
+    if (map.case) {
+      if (!caseEl) {
+        caseEl = document.createElement("p");
+        caseEl.id = "map-modal-case";
+        caseEl.className = "map-modal__case";
+        $("#map-modal-desc", mapModal).insertAdjacentElement("afterend", caseEl);
+      }
+      caseEl.hidden = false;
+      caseEl.textContent = `${map.case} — ${map.caseNote || ""}`;
+    } else if (caseEl) {
+      caseEl.hidden = true;
+    }
+
     const sizePct = map.size === "LARGE" ? 100 : map.size === "SMALL" ? 40 : 70;
     $("#map-modal-stats", mapModal).innerHTML = [
       mapStat("РАЗМЕР", map.size || "MEDIUM", sizePct),
@@ -1775,6 +1799,12 @@
     setTimeout(() => $(".modal__close", mapModal)?.focus(), 60);
   };
 
+  /* F-13: карта → номер дела из lore/CANON.md §8; ссылка ведёт в досье */
+  const recordToDocKey = (record) => {
+    const entry = LORE_BY_RECORD.get(String(record || "").toUpperCase());
+    return entry && entry.doc ? entry.doc : null;
+  };
+
   /* F-02: «скопировать ссылку» для локации */
   const paintMapActions = (map) => {
     const anchor = $("#map-modal-desc", mapModal);
@@ -1786,7 +1816,24 @@
       row.id = "fx-map-actions";
       anchor.insertAdjacentElement("afterend", row);
     }
-    row.innerHTML = `<button class="fx-action" type="button" data-fx-copy="${mapHash(map)}">${COPY_ICON}<span>Скопировать ссылку</span></button>`;
+    row.innerHTML = `
+      <button class="fx-action" type="button" data-fx-copy="${mapHash(map)}">${COPY_ICON}<span>Скопировать ссылку</span></button>
+      ${map.case ? `<a class="fx-action" href="${loreHash(recordToDocKey(map.case))}" data-fx-goto-lore="${recordToDocKey(map.case)}">${DOC_ICON}<span>Дело ${map.case}</span></a>` : ""}`;
+
+    let note = $("#fx-map-case", mapModal);
+    if (!note) {
+      note = document.createElement("p");
+      note.className = "fx-map-case";
+      note.id = "fx-map-case";
+      row.insertAdjacentElement("afterend", note);
+    }
+    if (map.case && map.caseNote) {
+      note.hidden = false;
+      note.innerHTML = `<b>${map.case}</b> · ${escapeHTML(map.caseNote)}`;
+    } else {
+      note.hidden = true;
+      note.textContent = "";
+    }
   };
 
   const closeMap = () => {
@@ -2182,6 +2229,23 @@
     },
     docs: () => Object.values(LORE_DOCS),
     archive: () => LORE_ARCHIVE.slice(),
+    /* F-07: записи в порядке рекомендации (CANON §10), потом всё остальное */
+    order: () => {
+      const seen = new Set();
+      const ordered = [];
+      LORE_READING_ORDER.forEach((rec) => {
+        const entry = LORE_BY_RECORD.get(rec);
+        if (!entry || !entry.doc || seen.has(entry.record)) return;
+        seen.add(entry.record);
+        ordered.push(entry);
+      });
+      LORE_ARCHIVE.forEach((entry) => {
+        if (!entry.doc || seen.has(entry.record)) return;
+        seen.add(entry.record);
+        ordered.push(entry);
+      });
+      return ordered;
+    },
     byRecord: (record) => LORE_BY_RECORD.get(String(record || "").toUpperCase()) || null,
     docKeyFor: loreDocKeyFor,
     /* F-07: открыто ли досье и, если закрыто, чем именно его рассекречивают */

@@ -645,6 +645,212 @@ mark.fx-hl.is-current {
   }
 }
 
+/* ---------- F-12: предметы-улики ---------- */
+
+.fx-evidence {
+  margin-top: 6px;
+}
+
+.fx-evidence__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 16px 0 18px;
+}
+
+.fx-evidence__search {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 260px;
+  max-width: 380px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.fx-evidence__search svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.fx-evidence__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.fx-evidence__count {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.fx-evidence__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.fx-evidence__card {
+  position: relative;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.fx-evidence__card:hover {
+  border-color: var(--gold);
+  background: var(--panel-2);
+}
+
+.fx-evidence__code {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  border: 1px solid var(--line);
+  padding: 3px 8px;
+  margin-bottom: 12px;
+}
+
+.fx-evidence__card h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.fx-evidence__card h3 small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.fx-evidence__card dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 12px;
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.fx-evidence__card dt {
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  align-self: center;
+}
+
+.fx-evidence__card dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.fx-evidence__owner {
+  color: var(--gold);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease);
+}
+
+.fx-evidence__owner:hover,
+.fx-evidence__owner:focus-visible {
+  border-bottom-color: var(--gold);
+}
+
+.fx-evidence__owner.is-quiet {
+  color: var(--muted);
+  border: 0;
+}
+
+.fx-evidence__hint {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- F-13: фильтры локаций ---------- */
+
+.fx-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.fx-filter {
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.fx-filter:hover,
+.fx-filter:focus-visible {
+  border-color: var(--gold);
+  color: var(--text);
+}
+
+.fx-filter.is-active {
+  border-color: var(--gold);
+  background: var(--panel-2);
+  color: var(--gold);
+}
+
+.map-card.is-filtered-out {
+  display: none;
+}
+
+.fx-map-tag {
+  color: var(--gold);
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  letter-spacing: 0.08em;
+}
+
+.fx-map-case {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.fx-map-case b {
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+
+.fx-timecode {
+  font-family: var(--font-display);
+  font-size: 0.92em;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fx-bar > i,
   .fx-chip,
@@ -654,7 +860,10 @@ mark.fx-hl.is-current {
   .fx-toast,
   .fx-graph__node circle,
   .fx-graph__edge,
-  .fx-order__btn {
+  .fx-order__btn,
+  .fx-evidence__card,
+  .fx-filter,
+  .fx-evidence__owner {
     transition: none;
   }
 
