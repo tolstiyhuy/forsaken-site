@@ -33,7 +33,7 @@
 
   const mediaHTML = (char) => {
     if (char.img) {
-      return `<img class="char-card__img" src="${char.img}" alt="${char.name}" loading="lazy" draggable="false">`;
+      return `<img class="char-card__img" src="${char.img}" alt="${char.name}" loading="lazy" decoding="async" draggable="false">`;
     }
     return `
       <div class="char-fallback" aria-hidden="true">
@@ -215,13 +215,17 @@
     }
   };
 
-  /* ---------- lore ---------- */
+  /* ---------- lore: источник данных ----------
+     Единственный источник — lore/manifest.json (владелец: Chat 1).
+     Ниже — fallback на хардкод: если fetch упал или JSON битый, сайт работает как раньше. */
 
-  const LORE_DOCS = {
+  const LORE_FALLBACK_DOCS = {
     chronos: {
       file: "lore/chronos.md",
       cat: "characters",
       name: "Хронос",
+      record: "LR-001",
+      related: ["LR-000", "LR-011"],
       sub: "Он и есть та самая лишняя секунда.",
       fileLabel: "ЛОР-ДОСЬЕ // LR-001",
       meta: ["13 ГЛАВ", "≈ 25 МИН ЧТЕНИЯ", "СПОЙЛЕРЫ"],
@@ -248,6 +252,8 @@
       file: "lore/place.md",
       cat: "place",
       name: "Место",
+      record: "LR-000",
+      related: ["LR-001", "LR-012"],
       sub: "Вечный ад — это не мир. Это счёт, который ведут.",
       fileLabel: "ЛОР-ДОСЬЕ // LR-000",
       meta: ["9 ГЛАВ", "≈ 18 МИН ЧТЕНИЯ", "СПОЙЛЕРЫ"],
@@ -260,9 +266,11 @@
   let currentLoreCat = "characters";
   let currentLoreDoc = null;
 
-  const LORE_GATES = {
-    place: { requires: "chronos" }
-  };
+  let LORE_DOCS = LORE_FALLBACK_DOCS;
+  let LORE_GATES = { place: { requires: "chronos" } };
+  let LORE_ARCHIVE = [];
+  let LORE_BY_RECORD = new Map();
+  let LORE_RELATED = new Map();
 
   const LORE_READ_KEY = "forsaken-lore-read";
   const loreRead = new Set();
@@ -284,9 +292,10 @@
   const isLoreRead = (key) => loreRead.has(key);
 
   const isLoreDocUnlocked = (key) => {
-    if (key === "chronos") return true;
+    if (!key || !LORE_DOCS[key]) return false;
     const gate = LORE_GATES[key];
-    return !!gate && loreRead.has(gate.requires);
+    if (!gate) return true;
+    return loreRead.has(gate.requires);
   };
 
   const isLoreItemOpen = (item) => (item.doc ? isLoreDocUnlocked(item.doc) : false);
@@ -316,10 +325,44 @@
     saveLorePages();
   };
 
+  /* F-10: «где я остановился». Живёт в том же хранилище под ключом __last —
+     старый формат (число на запись) остаётся нетронутым. */
+  const chapterTitleOf = (key, chapterId) => {
+    const cached = loreCache[key];
+    if (!cached || !chapterId) return null;
+    const ch = cached.chapters.find((c) => c.id === chapterId);
+    return ch ? ch.title : null;
+  };
+
+  const rememberLoreSpot = (key, chapterId) => {
+    if (!key) return;
+    lorePages.__last = {
+      doc: key,
+      chapter: chapterId || null,
+      chapterTitle: chapterTitleOf(key, chapterId),
+      at: Date.now()
+    };
+    saveLorePages();
+  };
+
+  const lastLoreSpot = () => {
+    const spot = lorePages.__last;
+    if (!spot || typeof spot !== "object" || !spot.doc || !LORE_DOCS[spot.doc]) return null;
+    const doc = LORE_DOCS[spot.doc];
+    return {
+      doc: spot.doc,
+      record: doc.record || spot.doc,
+      name: doc.name,
+      chapter: typeof spot.chapter === "string" ? spot.chapter : null,
+      chapterTitle: typeof spot.chapterTitle === "string" ? spot.chapterTitle : null,
+      at: Number(spot.at) || 0
+    };
+  };
+
   const loreView = { doc: null, index: 0, total: 0, atEnd: false, secondsLeft: 0 };
   let loreTimerId = null;
 
-  const LORE_ARCHIVE = [
+  const LORE_FALLBACK_ARCHIVE = [
     { id: "chronos", name: "Хронос", role: "KILLER", file: "LR-001", doc: "chronos", cat: "characters", open: true, teaser: "Лишняя секунда, которой не нашлось места." },
     { id: "twotime", name: "Two Time", role: "SURVIVOR", file: "LR-002", cat: "characters", teaser: "Культист, чья вера стоила Azure жизни." },
     { id: "johndoe", name: "John Doe", role: "KILLER", file: "LR-003", cat: "characters", teaser: "Первый носитель кода." },
@@ -336,10 +379,241 @@
     { id: "glossary", name: "Словарь архива", role: "ARCHIVE", file: "LR-013", cat: "other", teaser: "Секунда, долг, шов, квитанция. Как это называть." }
   ];
 
+  /* связи на случай, когда manifest.json недоступен */
+  const LORE_FALLBACK_RELATED = {
+    "LR-001": ["LR-000", "LR-011"],
+    "LR-000": ["LR-001", "LR-012"],
+    "LR-002": ["LR-001", "LR-005"],
+    "LR-003": ["LR-010", "LR-001"],
+    "LR-004": ["LR-012"],
+    "LR-005": ["LR-001"],
+    "LR-006": ["LR-004", "LR-012"],
+    "LR-007": ["LR-000"],
+    "LR-008": ["LR-006"],
+    "LR-009": ["LR-000", "LR-013"],
+    "LR-010": ["LR-003", "LR-001"],
+    "LR-011": ["LR-001", "LR-000"],
+    "LR-012": ["LR-000", "LR-011"],
+    "LR-013": ["LR-000"]
+  };
+
+  const LORE_CATS = ["characters", "place", "other"];
+
+  const buildLoreRelated = (archive) => {
+    const edges = new Map();
+    const addEdge = (from, to) => {
+      if (!from || !to || from === to) return;
+      if (!edges.has(from)) edges.set(from, new Set());
+      edges.get(from).add(to);
+      if (!edges.has(to)) edges.set(to, new Set());
+      edges.get(to).add(from);
+    };
+    archive.forEach((entry) => {
+      const from = entry.record || entry.file;
+      (entry.related || []).forEach((rec) => addEdge(from, String(rec).toUpperCase()));
+    });
+    const out = new Map();
+    edges.forEach((set, key) => {
+      out.set(
+        key,
+        [...set].sort((a, b) => a.localeCompare(b, "ru", { numeric: true }))
+      );
+    });
+    return out;
+  };
+
+  const applyLoreSource = ({ docs, gates, archive, byRecord }) => {
+    LORE_DOCS = docs;
+    LORE_GATES = gates;
+    LORE_ARCHIVE = archive;
+    LORE_BY_RECORD = new Map(byRecord);
+    LORE_RELATED = buildLoreRelated(archive);
+  };
+
+  const loreFallbackSource = () => {
+    const archive = LORE_FALLBACK_ARCHIVE.map((item) => ({
+      ...item,
+      record: item.file,
+      related: LORE_FALLBACK_RELATED[item.file] || []
+    }));
+    const byRecord = new Map();
+    archive.forEach((item) => {
+      if (item.record) byRecord.set(String(item.record).toUpperCase(), item);
+    });
+    return {
+      docs: LORE_FALLBACK_DOCS,
+      gates: { place: { requires: "chronos" } },
+      archive,
+      byRecord
+    };
+  };
+
+  /* manifest.json → те же структуры, что и хардкод. Один источник для доски и читалки. */
+  const loreFromManifest = (manifest) => {
+    const list = Array.isArray(manifest && manifest.docs) ? manifest.docs : [];
+    if (!list.length) throw new Error("manifest без записей");
+
+    const docs = {};
+    const gates = {};
+    const archive = [];
+    const byRecord = new Map();
+    const gateSeeds = [];
+
+    list.forEach((raw) => {
+      if (!raw || !raw.id) return;
+      const record = String(raw.record || "").toUpperCase();
+      const ready = raw.status === "ready" && !!raw.file;
+      const cat = LORE_CATS.includes(raw.cat) ? raw.cat : "characters";
+      const role = raw.role || (cat === "place" ? "PLACE" : cat === "other" ? "ARCHIVE" : "KILLER");
+
+      const entry = {
+        id: raw.id,
+        name: raw.name || raw.id,
+        role,
+        file: record || raw.id,
+        record: record || raw.id,
+        cat,
+        teaser: raw.teaser || raw.sub || "",
+        img: raw.img || null,
+        related: Array.isArray(raw.related) ? raw.related.map((r) => String(r).toUpperCase()) : []
+      };
+
+      if (ready) {
+        entry.doc = raw.id;
+        docs[raw.id] = {
+          file: raw.file,
+          cat,
+          name: entry.name,
+          record: entry.record,
+          sub: raw.sub || "",
+          fileLabel: raw.fileLabel || `ЛОР-ДОСЬЕ // ${entry.record}`,
+          meta: Array.isArray(raw.meta) && raw.meta.length ? raw.meta : ["ДОСЬЕ АРХИВА", "СПОЙЛЕРЫ"],
+          foot: raw.foot || "Запись архива.",
+          tocFoot: raw.tocFoot || `${entry.name.toUpperCase()} · ${entry.record}`,
+          download: raw.download || String(raw.file).split("/").pop(),
+          related: entry.related,
+          mode: raw.mode === "markers" ? "markers" : "ranges",
+          chapters:
+            raw.mode === "markers" || raw.chapters === "auto"
+              ? null
+              : Array.isArray(raw.chapters)
+                ? raw.chapters
+                : null,
+          planned: false
+        };
+        if (raw.requires) gateSeeds.push({ id: raw.id, requires: raw.requires });
+      }
+
+      archive.push(entry);
+      if (entry.record) byRecord.set(entry.record, entry);
+    });
+
+    if (!Object.keys(docs).length) throw new Error("manifest без готовых досье");
+    if (!archive.length) throw new Error("manifest без записей архива");
+
+    /* гейты ставим вторым проходом: requires может ссылаться на запись ниже по списку */
+    gateSeeds.forEach((seed) => {
+      if (seed.requires !== seed.id && docs[seed.requires]) {
+        gates[seed.id] = { requires: seed.requires };
+      }
+    });
+
+    return { docs, gates, archive, byRecord };
+  };
+
+  /* F-01: загрузка манифеста с таймаутом и fallback. Никогда не роняет сайт. */
+  const loadLoreSource = () => {
+    const useFallback = () => {
+      applyLoreSource(loreFallbackSource());
+    };
+
+    if (typeof fetch !== "function") {
+      useFallback();
+      return Promise.resolve();
+    }
+
+    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = setTimeout(() => {
+      if (ctrl) ctrl.abort();
+    }, 6000);
+
+    return fetch("lore/manifest.json", { cache: "no-cache", signal: ctrl ? ctrl.signal : undefined })
+      .then((res) => {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then((json) => {
+        applyLoreSource(loreFromManifest(json));
+      })
+      .catch(() => {
+        useFallback();
+      })
+      .then(() => {
+        clearTimeout(timer);
+      });
+  };
+
+  /* F-04: «См. также» — из manifest.related, двусторонне */
+  const LORE_RELATED_NODE_ID = "fx-related";
+
+  const ensureRelatedNode = () => {
+    let node = $("#" + LORE_RELATED_NODE_ID);
+    if (node) return node;
+    const content = $("#lore-content");
+    if (!content) return null;
+    node = document.createElement("div");
+    node.className = "fx-related";
+    node.id = LORE_RELATED_NODE_ID;
+    node.hidden = true;
+    content.insertAdjacentElement("afterend", node);
+    return node;
+  };
+
+  const paintLoreRelated = (key) => {
+    const node = ensureRelatedNode();
+    if (!node) return;
+    const doc = LORE_DOCS[key];
+    const record = doc && doc.record;
+    const allRecords = (record && LORE_RELATED.get(record)) || [];
+    const records = allRecords.slice(0, 8);
+    if (!records.length) {
+      node.hidden = true;
+      node.innerHTML = "";
+      return;
+    }
+
+    node.hidden = false;
+    node.innerHTML = `
+      <span class="fx-related__title">См. также</span>
+      <div class="fx-related__chips">
+        ${records
+          .map((rec) => {
+            const known = LORE_BY_RECORD.get(rec);
+            const pending = !known || !known.doc;
+            const name = known ? known.name : "Запись архива";
+            return `<a class="fx-chip${pending ? " is-pending" : ""}" href="#/lore/${rec}" data-fx-record="${rec}"><b>${rec}</b><span>${name}</span></a>`;
+          })
+          .join("")}
+        ${
+          allRecords.length > records.length
+            ? `<a class="fx-chip is-pending" href="#/tab/lore" data-tab="lore"><b>+${allRecords.length - records.length}</b><span>ещё в архиве</span></a>`
+            : ""
+        }
+      </div>`;
+  };
+
   const escapeHTML = (text) =>
     text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const inlineLore = (text) => escapeHTML(text).replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  /* F-03: любой LR-### в тексте становится ссылкой на досье */
+  const linkifyLoreRecords = (html) =>
+    html.replace(/LR-\d{3}/g, (record) => {
+      const known = LORE_BY_RECORD.get(record);
+      const pending = !known || !known.doc;
+      return `<a class="fx-lore-link${pending ? " fx-lore-link--pending" : ""}" href="#/lore/${record}" data-fx-record="${record}">${record}</a>`;
+    });
+
+  const inlineLore = (text) => linkifyLoreRecords(escapeHTML(text).replace(/\*([^*]+)\*/g, "<em>$1</em>"));
 
   const parseLoreText = (text, doc) => {
     if (doc.chapters) {
@@ -387,7 +661,7 @@
     const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === item.id);
     const img = item.img || (char && char.img);
     const art = img
-      ? `<img src="${img}" alt="${item.name}" loading="lazy" draggable="false">`
+      ? `<img src="${img}" alt="${item.name}" loading="lazy" decoding="async" draggable="false">`
       : `<span class="lore-file__letter">${initialOf(item.name)}</span>`;
 
     const open = isLoreItemOpen(item);
@@ -466,6 +740,25 @@
     loreToastTimer = setTimeout(() => toast.classList.remove("is-visible"), 4600);
   };
 
+  const loreDocKeyFor = (idOrRecord) => {
+    const raw = String(idOrRecord || "").trim();
+    if (!raw) return null;
+    if (LORE_DOCS[raw]) return raw;
+    const entry = LORE_BY_RECORD.get(raw.toUpperCase());
+    return entry && entry.doc ? entry.doc : null;
+  };
+
+  const openLoreRecord = (record) => {
+    const rec = String(record || "").toUpperCase();
+    const entry = LORE_BY_RECORD.get(rec);
+    if (entry && entry.doc) {
+      requestLoreDoc(entry.doc);
+      return;
+    }
+    if (entry) showLoreToast(`ДОСЬЕ «${entry.name.toUpperCase()}» ЕЩЁ НЕ РАССЕКРЕЧЕНО`);
+    else showLoreToast(`ЗАПИСЬ ${rec} В АРХИВЕ НЕ НАЙДЕНА`);
+  };
+
   const updateLorePlaceFeature = () => {
     const feature = document.querySelector('[data-lore-only="place"].lore-feature');
     if (!feature) return;
@@ -495,6 +788,13 @@
     if (chronosStamp) chronosStamp.textContent = isLoreRead("chronos") ? "ПРОЧИТАНО" : "ДОСЬЕ ОТКРЫТО";
   };
 
+  const loreProgressStats = () => {
+    const read = [...loreRead].filter((key) => !!LORE_DOCS[key]).length;
+    const total = LORE_ARCHIVE.length || Object.keys(LORE_DOCS).length;
+    const unlocked = Object.keys(LORE_DOCS).filter(isLoreDocUnlocked).length;
+    return { read, total, unlocked };
+  };
+
   const updateLoreAccess = () => {
     renderLoreArchive();
     updateLorePlaceFeature();
@@ -503,6 +803,13 @@
       const count = Object.keys(LORE_DOCS).filter(isLoreDocUnlocked).length;
       meta.textContent = String(count).padStart(2, "0");
     }
+    const stats = loreProgressStats();
+    const headNode = $("#fx-lore-progress");
+    if (headNode) {
+      headNode.innerHTML = `<b>${stats.read}</b> / ${stats.total} восстановлено`;
+      headNode.setAttribute("aria-label", `Восстановлено ${stats.read} из ${stats.total} записей архива`);
+    }
+    document.dispatchEvent(new CustomEvent("fx:progress", { detail: stats }));
   };
 
   const scrollToLoreReader = () => {
@@ -638,6 +945,8 @@
     startLoreChapterTimer(key, target);
     updateLoreProgress();
     updateLorePager();
+    syncLoreHash(key, cached.chapters[target] && cached.chapters[target].id);
+    rememberLoreSpot(key, cached.chapters[target] && cached.chapters[target].id);
 
     requestAnimationFrame(() => {
       checkLoreChapterEnd();
@@ -717,6 +1026,8 @@
     const foot = $("#lore-article-foot");
     if (foot) foot.textContent = "Запись закрыта до прочтения предыдущего досье.";
 
+    paintLoreRelated(null);
+
     content.innerHTML = `
       <div class="lore-gate">
         <span class="lore-gate__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
@@ -727,9 +1038,12 @@
       </div>`;
   };
 
-  const requestLoreDoc = (key) => {
+  const requestLoreDoc = (key, { chapter = null } = {}) => {
     const doc = LORE_DOCS[key];
-    if (!doc) return;
+    if (!doc) {
+      showLoreToast("ЭТО ДОСЬЕ ЕЩЁ НЕ РАССЕКРЕЧЕНО");
+      return;
+    }
 
     if (!isLoreDocUnlocked(key)) {
       const gate = LORE_GATES[key];
@@ -742,11 +1056,11 @@
       return;
     }
 
-    renderLoreDoc(key);
+    renderLoreDoc(key, { chapter });
     scrollToLoreReader();
   };
 
-  const renderLoreDoc = (key, { scroll = false } = {}) => {
+  const renderLoreDoc = (key, { scroll = false, chapter = null, silent = false } = {}) => {
     const doc = LORE_DOCS[key];
     const content = $("#lore-content");
     if (!doc || !content) return;
@@ -754,18 +1068,13 @@
     if (doc.cat && doc.cat !== currentLoreCat) setLoreCat(doc.cat);
 
     paintLoreChrome(doc);
+    if (!silent) syncLoreHash(key, chapter);
 
     if (!isLoreDocUnlocked(key)) {
       currentLoreDoc = null;
       renderLoreGate(key);
       return;
     }
-
-    if (currentLoreDoc === key) {
-      if (scroll) scrollToLoreReader();
-      return;
-    }
-    currentLoreDoc = key;
 
     const paint = () => {
       const cached = loreCache[key];
@@ -783,16 +1092,30 @@
       }
       const pager = $("#lore-pager");
       if (pager) pager.hidden = false;
-      showLoreChapter(key, isLoreRead(key) ? 0 : lorePageMax(key), { scroll });
+
+      const wanted = chapter ? cached.chapters.findIndex((ch) => ch.id === chapter) : -1;
+      const start = wanted >= 0 ? wanted : isLoreRead(key) ? 0 : lorePageMax(key);
+      showLoreChapter(key, start, { scroll });
+      paintLoreRelated(key);
+      document.dispatchEvent(new CustomEvent("fx:doc", { detail: { key, record: doc.record || key, total: cached.chapters.length } }));
     };
 
     if (loreCache[key]) {
+      if (currentLoreDoc === key && !chapter) {
+        paintLoreRelated(key);
+        if (scroll) scrollToLoreReader();
+        return;
+      }
+      currentLoreDoc = key;
       paint();
       return;
     }
 
+    currentLoreDoc = key;
     content.innerHTML = loreLoadingHTML;
-    fetch(doc.file)
+    /* cache: "no-cache" — файлы лора правятся часто, браузер иначе отдаёт
+       устаревшую копию по эвристике свежести (без ревалидации) */
+    fetch(doc.file, { cache: "no-cache" })
       .then((r) => {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.text();
@@ -810,6 +1133,7 @@
           <div class="lore-error">
             <b>Архив не загрузился.</b>
             <p>Текст доступен по прямой ссылке: <a href="${doc.file}" download="${doc.download}">${doc.download}</a></p>
+            <p><button class="btn btn--ghost btn--small" type="button" data-fx-retry="${key}">Попробовать снова</button></p>
           </div>`;
       });
   };
@@ -817,10 +1141,21 @@
   const initLore = () => {
     const content = $("#lore-content");
     if (!content) return;
+
+    /* F-06: прогресс восстановления архива в шапке раздела «Лор» */
+    const headMeta = $("#tab-lore .page-head__meta");
+    if (headMeta && !$("#fx-lore-progress")) {
+      const node = document.createElement("span");
+      node.id = "fx-lore-progress";
+      node.className = "fx-progress-inline";
+      node.setAttribute("role", "status");
+      headMeta.appendChild(node);
+    }
+
     setLoreCat("characters");
     updateLoreAccess();
     initLoreProgress();
-    renderLoreDoc("chronos");
+    if (LORE_DOCS.chronos) renderLoreDoc("chronos", { silent: true });
 
     $("#lore-cats")?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-lore-cat]");
@@ -888,6 +1223,24 @@
       if (!card) return;
       e.preventDefault();
       openCard(card);
+    });
+
+    /* F-03 / F-04: клик по LR-### и по чипам «См. также» открывает досье */
+    document.addEventListener("click", (e) => {
+      const link = e.target.closest("a[data-fx-record]");
+      if (!link) return;
+      e.preventDefault();
+      openLoreRecord(link.dataset.fxRecord);
+    });
+
+    /* F-18: повторная попытка загрузки упавшего досье */
+    content.addEventListener("click", (e) => {
+      const retry = e.target.closest("[data-fx-retry]");
+      if (!retry) return;
+      e.preventDefault();
+      const key = retry.dataset.fxRetry;
+      delete loreCache[key];
+      renderLoreDoc(key, { chapter: null });
     });
   };
 
@@ -957,13 +1310,81 @@
 
   let currentTab = "home";
 
-  const readHash = () => {
-    const raw = location.hash.replace(/^#/, "");
-    const [tab, id] = raw.split("/");
-    return {
-      tab: TITLES[tab] ? tab : "home",
-      id: id || null
-    };
+  /* F-02: один парсер на все формы хэша.
+     Новый канон: #/tab/maps · #/killer/chronos · #/survivor/twotime · #/map/crossroads · #/lore/LR-005
+     Старый формат (#killers/chronos) читается ради ссылок в index.html и закладок. */
+  const ROUTE_TABS = {
+    killers: "killers",
+    killer: "killers",
+    survivors: "survivors",
+    survivor: "survivors",
+    maps: "maps",
+    map: "maps",
+    items: "items",
+    mechanics: "mechanics",
+    updates: "updates",
+    lore: "lore",
+    home: "home"
+  };
+
+  const parseRoute = (hash) => {
+    const raw = String(hash || "").replace(/^#/, "").replace(/^\/+/, "");
+    if (!raw) return { kind: "tab", tab: "home" };
+    const parts = raw.split("/").filter(Boolean).map((part) => {
+      try {
+        return decodeURIComponent(part);
+      } catch (err) {
+        return part;
+      }
+    });
+    const head = (parts[0] || "").toLowerCase();
+    const rest = parts.slice(1);
+
+    if (head === "tab") {
+      const tab = (rest[0] || "home").toLowerCase();
+      return { kind: "tab", tab: TITLES[tab] ? tab : "home" };
+    }
+    if (head === "lore") {
+      return { kind: "lore", id: rest[0] || null, chapter: rest[1] || null };
+    }
+    if (head === "killer" || head === "killers") {
+      return { kind: "char", role: "killers", id: rest[0] || null };
+    }
+    if (head === "survivor" || head === "survivors") {
+      return { kind: "char", role: "survivors", id: rest[0] || null };
+    }
+    if (head === "map" || head === "maps") {
+      return { kind: "map", id: rest[0] || null };
+    }
+    if (TITLES[head]) return { kind: "tab", tab: head };
+    return { kind: "tab", tab: "home" };
+  };
+
+  const tabHash = (tab) => `#/tab/${TITLES[tab] ? tab : "home"}`;
+
+  const charHash = (char) => `#/${char.role === "killer" ? "killer" : "survivor"}/${encodeURIComponent(char.id)}`;
+
+  const mapHash = (map) => `#/map/${encodeURIComponent(map.id)}`;
+
+  const loreHash = (key, chapter) => {
+    const doc = LORE_DOCS[key];
+    const record = doc && (doc.record || key);
+    if (!record) return tabHash("lore");
+    return `#/lore/${encodeURIComponent(record)}${chapter ? "/" + encodeURIComponent(chapter) : ""}`;
+  };
+
+  const writeHash = (hash) => {
+    if (!hash || location.hash === hash) return;
+    try {
+      history.replaceState(null, "", hash);
+    } catch (err) {
+      location.hash = hash;
+    }
+  };
+
+  const syncLoreHash = (key, chapter) => {
+    if (currentTab !== "lore") return;
+    writeHash(loreHash(key, chapter));
   };
 
   const setTab = (tab, { updateHash = true, scroll = true } = {}) => {
@@ -984,13 +1405,60 @@
     });
 
     document.title = TITLES[tab];
-    if (updateHash) history.replaceState(null, "", "#" + tab);
+    if (updateHash) writeHash(tabHash(tab));
     if (scroll) window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
     closeMenu();
     observeReveals();
     requestAnimationFrame(revealVisible);
     if (tab === "lore") requestAnimationFrame(updateLoreProgress);
     if (tab === "maps") primeMapPhotos();
+    document.dispatchEvent(new CustomEvent("fx:tab", { detail: { tab } }));
+  };
+
+  const applyRoute = (route, { initial = false } = {}) => {
+    if (!route) return;
+
+    if (route.kind === "lore") {
+      const key = loreDocKeyFor(route.id);
+      setTab("lore", { updateHash: false, scroll: !initial });
+      if (key) {
+        renderLoreDoc(key, { scroll: !initial, chapter: route.chapter });
+        if (initial) {
+          setTimeout(() => {
+            if (isLoreDocUnlocked(key)) scrollToLoreReader();
+          }, 120);
+        }
+      } else if (route.id) {
+        showLoreToast(`ЗАПИСЬ ${String(route.id).toUpperCase()} В АРХИВЕ НЕ НАЙДЕНА`);
+      }
+      return;
+    }
+
+    if (route.kind === "char") {
+      const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === route.id);
+      if (!char) {
+        setTab(route.role, { updateHash: false, scroll: !initial });
+        return;
+      }
+      setTab(route.role, { updateHash: false, scroll: false });
+      const open = () => openModal(char);
+      if (initial) setTimeout(open, 260);
+      else open();
+      return;
+    }
+
+    if (route.kind === "map") {
+      const map = SITE_DATA.maps.find((m) => m.id === route.id);
+      setTab("maps", { updateHash: false, scroll: false });
+      if (!map) return;
+      const open = () => openMap(map);
+      if (initial) setTimeout(open, 260);
+      else open();
+      return;
+    }
+
+    setTab(route.tab, { updateHash: false, scroll: !initial });
+    if (initial) writeHash(tabHash(route.tab));
   };
 
   /* ---------- filters ---------- */
@@ -1052,6 +1520,62 @@
         <div class="modal-stat__bar"><i style="width:${pct}%"></i></div>
       </div>`;
   };
+
+  /* ---------- toasts & share (F-02) ---------- */
+
+  let fxToastTimer = null;
+  const showToast = (text) => {
+    let node = $("#fx-toast");
+    if (!node) {
+      node = document.createElement("div");
+      node.id = "fx-toast";
+      node.className = "fx-toast";
+      node.setAttribute("role", "status");
+      node.setAttribute("aria-live", "polite");
+      document.body.appendChild(node);
+    }
+    node.textContent = text;
+    node.classList.add("is-visible");
+    clearTimeout(fxToastTimer);
+    fxToastTimer = setTimeout(() => node.classList.remove("is-visible"), 2800);
+  };
+
+  const absoluteUrl = (hash) => location.href.split("#")[0] + hash;
+
+  const copyText = (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve, reject) => {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.top = "-1000px";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (err) {
+        ok = false;
+      }
+      area.remove();
+      if (ok) resolve();
+      else reject(new Error("copy failed"));
+    });
+  };
+
+  const shareLink = (hash) => {
+    const url = absoluteUrl(hash);
+    copyText(url)
+      .then(() => showToast("ССЫЛКА СКОПИРОВАНА"))
+      .catch(() => showToast("НЕ УДАЛОСЬ СКОПИРОВАТЬ · " + url));
+  };
+
+  const COPY_ICON = `<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="9" height="9" rx="1.5"/><path d="M6 2h6a2 2 0 0 1 2 2v6"/></svg>`;
+  const DOC_ICON = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h7l3 3v9H3z"/><path d="M6 7h4M6 10h4"/></svg>`;
 
   const openModal = (char) => {
     if (!modal) return;
@@ -1136,12 +1660,32 @@
     $("#modal-credits", modal).innerHTML = `
       <span>SEASON 01</span><i>•</i><span>PATCH 1.0.23</span><i>•</i><span>${char.role === "killer" ? "KILLER DOSSIER" : "SURVIVOR FILE"}</span>`;
 
+    paintCharActions(char);
+
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
-    const roleTab = char.role === "killer" ? "killers" : "survivors";
-    history.replaceState(null, "", `#${roleTab}/${char.id}`);
+    writeHash(charHash(char));
     setTimeout(() => $(".modal__close", modal)?.focus(), 60);
+  };
+
+  /* F-11 + F-02: из модалки — в лор-досье и «скопировать ссылку» */
+  const paintCharActions = (char) => {
+    const anchor = $("#modal-desc", modal);
+    if (!anchor) return;
+    let row = $("#fx-char-actions", modal);
+    if (!row) {
+      row = document.createElement("div");
+      row.className = "fx-actions";
+      row.id = "fx-char-actions";
+      anchor.insertAdjacentElement("afterend", row);
+    }
+    const entry = LORE_ARCHIVE.find((item) => item.id === char.id);
+    const docKey = entry && entry.doc ? entry.doc : null;
+    row.innerHTML = `
+      <button class="fx-action" type="button" data-fx-copy="${charHash(char)}">${COPY_ICON}<span>Скопировать ссылку</span></button>
+      ${docKey ? `<a class="fx-action" href="${loreHash(docKey)}" data-fx-goto-lore="${docKey}">${DOC_ICON}<span>Лор-досье ${entry.record || ""}</span></a>` : ""}
+    `;
   };
 
   const closeModal = () => {
@@ -1149,7 +1693,7 @@
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
     if (!mapModal || !mapModal.classList.contains("is-open")) document.body.classList.remove("modal-open");
-    history.replaceState(null, "", "#" + currentTab);
+    writeHash(tabHash(currentTab));
     if (lastFocused) lastFocused.focus();
   };
 
@@ -1215,11 +1759,27 @@
     $("#map-modal-credits", mapModal).innerHTML = `
       <span>${map.players || "4 выживших"}</span><i>•</i><span>SEASON 01</span><i>•</i><span>LOCATION FILE</span>`;
 
+    paintMapActions(map);
+
     mapModal.classList.add("is-open");
     mapModal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
-    history.replaceState(null, "", `#maps/${map.id}`);
+    writeHash(mapHash(map));
     setTimeout(() => $(".modal__close", mapModal)?.focus(), 60);
+  };
+
+  /* F-02: «скопировать ссылку» для локации */
+  const paintMapActions = (map) => {
+    const anchor = $("#map-modal-desc", mapModal);
+    if (!anchor) return;
+    let row = $("#fx-map-actions", mapModal);
+    if (!row) {
+      row = document.createElement("div");
+      row.className = "fx-actions";
+      row.id = "fx-map-actions";
+      anchor.insertAdjacentElement("afterend", row);
+    }
+    row.innerHTML = `<button class="fx-action" type="button" data-fx-copy="${mapHash(map)}">${COPY_ICON}<span>Скопировать ссылку</span></button>`;
   };
 
   const closeMap = () => {
@@ -1227,7 +1787,7 @@
     mapModal.classList.remove("is-open");
     mapModal.setAttribute("aria-hidden", "true");
     if (!modal || !modal.classList.contains("is-open")) document.body.classList.remove("modal-open");
-    history.replaceState(null, "", "#maps");
+    writeHash(tabHash("maps"));
     if (mapLastFocused) mapLastFocused.focus();
   };
 
@@ -1235,6 +1795,20 @@
     if (!modal) return;
 
     document.addEventListener("click", (e) => {
+      const copyBtn = e.target.closest("[data-fx-copy]");
+      if (copyBtn) {
+        e.preventDefault();
+        shareLink(copyBtn.dataset.fxCopy);
+        return;
+      }
+      const loreGo = e.target.closest("[data-fx-goto-lore]");
+      if (loreGo) {
+        e.preventDefault();
+        const key = loreGo.dataset.fxGotoLore;
+        if (modal && modal.classList.contains("is-open")) closeModal();
+        applyRoute({ kind: "lore", id: key, chapter: null });
+        return;
+      }
       const card = e.target.closest(".char-card, .compare__row");
       if (card) {
         const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === card.dataset.id);
@@ -1520,17 +2094,7 @@
     });
 
     window.addEventListener("hashchange", () => {
-      const { tab, id } = readHash();
-      if (tab !== currentTab) setTab(tab, { updateHash: false });
-      if (id && tab === "maps") {
-        const map = SITE_DATA.maps.find((m) => m.id === id);
-        if (map) openMap(map);
-      } else if (id && tab === "lore") {
-        if (LORE_DOCS[id]) renderLoreDoc(id, { scroll: true });
-      } else if (id) {
-        const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === id);
-        if (char) openModal(char);
-      }
+      applyRoute(parseRoute(location.hash));
     });
   };
 
@@ -1583,25 +2147,74 @@
     initScrollProgress();
     animateCounters();
 
-    const { tab, id } = readHash();
-    setTab(tab, { updateHash: false, scroll: false });
+    applyRoute(parseRoute(location.hash), { initial: true });
+    if (window.FX) window.FX.ready = true;
+    document.dispatchEvent(new CustomEvent("fx:ready"));
+  };
 
-    if (id) {
-      if (tab === "maps") {
-        const map = SITE_DATA.maps.find((m) => m.id === id);
-        if (map) setTimeout(() => openMap(map), 300);
-      } else if (tab === "lore") {
-        if (LORE_DOCS[id]) setTimeout(() => renderLoreDoc(id, { scroll: true }), 300);
-      } else {
-        const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === id);
-        if (char) setTimeout(() => openModal(char), 300);
-      }
-    }
+  /* F-01: сначала манифест лора, потом всё остальное. Fallback внутри. */
+  const start = () => loadLoreSource().then(boot, boot);
+
+  /* Единственная глобальная точка для новых модулей (js/features.js и далее). */
+  window.FX = {
+    version: "1.0.0",
+    tab: (tab) => setTab(tab),
+    go: (hash) => applyRoute(parseRoute(hash)),
+    openDoc: (idOrRecord, opts) => {
+      const key = loreDocKeyFor(idOrRecord);
+      if (key) requestLoreDoc(key, opts || {});
+      else openLoreRecord(idOrRecord);
+    },
+    openChar: (id) => {
+      const char = [...SITE_DATA.killers, ...SITE_DATA.survivors].find((c) => c.id === id);
+      if (char) openModal(char);
+    },
+    openMap: (id) => {
+      const map = SITE_DATA.maps.find((m) => m.id === id);
+      if (map) openMap(map);
+    },
+    docs: () => Object.values(LORE_DOCS),
+    archive: () => LORE_ARCHIVE.slice(),
+    byRecord: (record) => LORE_BY_RECORD.get(String(record || "").toUpperCase()) || null,
+    docKeyFor: loreDocKeyFor,
+    openChapter: (chapterId) => {
+      if (!loreView.doc) return false;
+      const cached = loreCache[loreView.doc];
+      if (!cached) return false;
+      const index = cached.chapters.findIndex((ch) => ch.id === chapterId);
+      if (index < 0) return false;
+      showLoreChapter(loreView.doc, index);
+      return true;
+    },
+    relatedOf: (idOrRecord) => {
+      const key = loreDocKeyFor(idOrRecord);
+      const doc = key && LORE_DOCS[key];
+      const record = doc ? doc.record : String(idOrRecord || "").toUpperCase();
+      const records = LORE_RELATED.get(record) || [];
+      return records.map((rec) => LORE_BY_RECORD.get(rec)).filter(Boolean);
+    },
+    progress: loreProgressStats,
+    maxChapter: () => {
+      if (!loreView.doc) return -1;
+      const cached = loreCache[loreView.doc];
+      if (!cached) return -1;
+      return isLoreRead(loreView.doc)
+        ? cached.chapters.length - 1
+        : Math.min(lorePageMax(loreView.doc), cached.chapters.length - 1);
+    },
+    lastSpot: lastLoreSpot,
+    hash: { tab: tabHash, char: charHash, map: mapHash, lore: loreHash },
+    toast: showToast,
+    copyLink: shareLink,
+    currentTab: () => currentTab,
+    currentDoc: () => currentLoreDoc,
+    reduceMotion: reduced,
+    ready: false
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
+    document.addEventListener("DOMContentLoaded", start);
   } else {
-    boot();
+    start();
   }
 })();
