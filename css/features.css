@@ -1,0 +1,589 @@
+/* ============================================================
+   FORSAKEN — стили фич Chat 3
+   Только префикс fx-  ·  css/style.css не переопределяем
+   ============================================================ */
+
+/* ---------- F-03: авто-линковка LR-### ---------- */
+
+.fx-lore-link {
+  color: var(--gold);
+  border-bottom: 1px dashed rgba(248, 217, 109, 0.45);
+  padding-bottom: 1px;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  white-space: nowrap;
+}
+
+.fx-lore-link:hover,
+.fx-lore-link:focus-visible {
+  color: #fff;
+  border-bottom-color: var(--gold);
+}
+
+.fx-lore-link--pending {
+  color: var(--muted);
+  border-bottom-color: rgba(143, 139, 131, 0.4);
+}
+
+.fx-lore-link--pending:hover,
+.fx-lore-link--pending:focus-visible {
+  color: var(--text);
+  border-bottom-color: var(--muted);
+}
+
+/* ---------- F-04: «См. также» ---------- */
+
+.fx-related {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.fx-related__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.fx-related__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 12px;
+  line-height: 1.2;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.fx-chip b {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.fx-chip span {
+  color: var(--text);
+}
+
+.fx-chip:hover,
+.fx-chip:focus-visible {
+  border-color: var(--gold);
+  background: var(--panel-2);
+  transform: translateY(-1px);
+}
+
+.fx-chip.is-pending {
+  opacity: 0.6;
+}
+
+.fx-chip.is-pending b {
+  color: var(--muted);
+}
+
+/* ---------- F-06: прогресс восстановления ---------- */
+
+.fx-progress-inline {
+  color: var(--gold) !important;
+  letter-spacing: 0.06em;
+}
+
+.fx-progress-inline b {
+  color: #fff;
+}
+
+.fx-home-archive {
+  padding-top: 0;
+}
+
+.fx-panel {
+  position: relative;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--panel) 0%, var(--bg-soft) 100%);
+  padding: 26px 28px;
+  overflow: hidden;
+}
+
+.fx-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--red), transparent);
+  opacity: 0.8;
+}
+
+.fx-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.fx-panel__kicker {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fx-panel__count {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.fx-bar {
+  position: relative;
+  height: 6px;
+  background: #14141a;
+  border: 1px solid var(--line-soft);
+  overflow: hidden;
+}
+
+.fx-bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--red), var(--gold));
+  transition: width 0.6s var(--ease);
+}
+
+.fx-panel__hint {
+  margin: 14px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 62ch;
+}
+
+.fx-panel__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.fx-link-quiet {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.fx-link-quiet:hover,
+.fx-link-quiet:focus-visible {
+  color: var(--text);
+  border-bottom-color: var(--red);
+}
+
+/* ---------- F-02 / F-11: действия в модалках ---------- */
+
+.fx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 4px 0 18px;
+}
+
+.fx-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.fx-action svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fx-action:hover,
+.fx-action:focus-visible {
+  color: var(--text);
+  border-color: var(--gold);
+  background: var(--panel-2);
+}
+
+/* ---------- тосты ---------- */
+
+.fx-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 16px);
+  z-index: 400;
+  max-width: min(92vw, 520px);
+  padding: 12px 20px;
+  border: 1px solid var(--line);
+  background: rgba(10, 10, 13, 0.96);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.fx-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- F-08: command palette ---------- */
+
+body.fx-palette-open {
+  overflow: hidden;
+}
+
+.fx-palette {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 16px 24px;
+}
+
+.fx-palette__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 4, 6, 0.72);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+}
+
+.fx-palette.is-open .fx-palette__backdrop {
+  opacity: 1;
+}
+
+.fx-palette__card {
+  position: relative;
+  width: min(640px, 100%);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+  transform: translateY(-10px) scale(0.99);
+  opacity: 0;
+  transition: transform 0.22s var(--ease), opacity 0.22s var(--ease);
+  overflow: hidden;
+}
+
+.fx-palette.is-open .fx-palette__card {
+  transform: none;
+  opacity: 1;
+}
+
+.fx-palette__search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.fx-palette__search svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.fx-palette__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+}
+
+.fx-palette__esc {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  color: var(--dim);
+}
+
+.fx-palette__list {
+  overflow-y: auto;
+  padding: 8px;
+  flex: 1 1 auto;
+}
+
+.fx-palette__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.fx-palette__item.is-active,
+.fx-palette__item:hover {
+  background: var(--panel-2);
+  border-color: var(--line);
+}
+
+.fx-palette__kind {
+  flex: 0 0 auto;
+  min-width: 58px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--red-2);
+  border: 1px solid rgba(224, 27, 36, 0.35);
+  padding: 3px 6px;
+  text-align: center;
+}
+
+.fx-palette__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fx-palette__text b {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fx-palette__text small {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fx-palette__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fx-palette__foot {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 10px 18px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.fx-palette__foot kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  margin-right: 4px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* ---------- F-09: поиск в читалке ---------- */
+
+.fx-lore-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.fx-lore-search__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.fx-lore-search__field svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.fx-lore-search__field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+}
+
+.fx-lore-search__count {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.fx-lore-search__nav {
+  display: flex;
+  gap: 4px;
+}
+
+.fx-lore-search__btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.fx-lore-search__btn:hover,
+.fx-lore-search__btn:focus-visible {
+  color: var(--text);
+  border-color: var(--gold);
+}
+
+mark.fx-hl {
+  background: rgba(248, 217, 109, 0.18);
+  color: var(--text);
+  outline: 1px solid rgba(248, 217, 109, 0.35);
+  outline-offset: 1px;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+mark.fx-hl.is-current {
+  background: var(--red);
+  color: #fff;
+  outline-color: var(--red-2);
+}
+
+/* ---------- подсветка найденного элемента из палитры ---------- */
+
+.fx-flash {
+  animation: fx-flash 1.6s var(--ease);
+}
+
+@keyframes fx-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(224, 27, 36, 0);
+  }
+  25% {
+    box-shadow: 0 0 0 2px rgba(224, 27, 36, 0.7);
+  }
+}
+
+/* ---------- адаптив ---------- */
+
+@media (max-width: 720px) {
+  .fx-palette {
+    padding-top: 6vh;
+  }
+
+  .fx-palette__card {
+    max-height: 82vh;
+  }
+
+  .fx-panel {
+    padding: 20px 18px;
+  }
+
+  .fx-panel__head {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fx-lore-search {
+    padding: 8px 10px;
+  }
+
+  .fx-lore-search__count {
+    order: 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-bar > i,
+  .fx-chip,
+  .fx-action,
+  .fx-palette__card,
+  .fx-palette__backdrop,
+  .fx-toast {
+    transition: none;
+  }
+
+  .fx-flash {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(224, 27, 36, 0.7);
+  }
+}
