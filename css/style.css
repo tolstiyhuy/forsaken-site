@@ -2317,7 +2317,19 @@ ul, ol {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   z-index: 2;
+}
+
+.map-card__case {
+  padding: 4px 7px;
+  border: 1px solid rgba(240, 198, 90, 0.42);
+  background: rgba(8, 7, 6, 0.72);
+  color: #f0c65a;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
 }
 
 .map-card__tag {

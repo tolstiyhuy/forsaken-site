@@ -91,7 +91,7 @@
       </div>
       <div class="map-card__top">
         <span class="map-card__tag ${map.tag === "DEV" ? "is-dev" : ""}">${map.tag}</span>
-        ${map.case ? `<span class="map-card__case" title="${map.caseNote || ""}">${map.case}</span>` : ""}
+        ${map.case ? `<span class="map-card__case" title="${escapeHTML(map.caseNote || "")}">${map.case}</span>` : ""}
         <span class="map-card__num">${String(i + 1).padStart(2, "0")} / ${String(SITE_DATA.maps.length).padStart(2, "0")}</span>
       </div>
       <div class="map-card__body">
@@ -102,7 +102,6 @@
           <span>${map.type}</span>
           <span>${map.size || "MEDIUM"}</span>
           <span class="map-card__danger">ОПАСНОСТЬ ${"●".repeat(map.danger) || "—"}${"○".repeat(Math.max(0, 5 - map.danger))}</span>
-          ${map.case ? `<span class="fx-map-tag">ДЕЛО ${map.case}</span>` : ""}
         </div>
         <div class="map-card__open">
           <span>Открыть локацию</span>
@@ -1753,20 +1752,6 @@
     $("#map-modal-name", mapModal).textContent = map.name;
     $("#map-modal-ru", mapModal).textContent = map.ru;
     $("#map-modal-desc", mapModal).textContent = map.desc;
-
-    let caseEl = $("#map-modal-case", mapModal);
-    if (map.case) {
-      if (!caseEl) {
-        caseEl = document.createElement("p");
-        caseEl.id = "map-modal-case";
-        caseEl.className = "map-modal__case";
-        $("#map-modal-desc", mapModal).insertAdjacentElement("afterend", caseEl);
-      }
-      caseEl.hidden = false;
-      caseEl.textContent = `${map.case} — ${map.caseNote || ""}`;
-    } else if (caseEl) {
-      caseEl.hidden = true;
-    }
 
     const sizePct = map.size === "LARGE" ? 100 : map.size === "SMALL" ? 40 : 70;
     $("#map-modal-stats", mapModal).innerHTML = [
