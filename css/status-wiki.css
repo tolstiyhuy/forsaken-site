@@ -1,0 +1,1265 @@
+/* ============================================================
+   FORSAKEN — ВИКИ СТАТУС-ЭФФЕКТОВ  ·  css/status-wiki.css
+   ------------------------------------------------------------
+   Владелец: Агент B (стили). Файл подключается последним, после
+   style.css / v2.css / features.css.
+
+   ПРАВИЛА ФАЙЛА:
+   · Все селекторы — только с префиксом .sw-. Чужие классы, body
+     и :root не переопределяются.
+   · Цвета — токены сайта (--panel, --line, --text, --red, --gold,
+     --v2-*) плюс игровой акцент карточки: var(--sw-color).
+   · Акцент разводится по прозрачности через color-mix (в проекте
+     он уже используется в style.css / v2.css).
+   · Обе темы: тёмная (по умолчанию) и светлая «рассекреченный
+     архив» (@media prefers-color-scheme: light).
+   · Адаптив: 1440 / 1024 / 768 / 480 / 360 px.
+   · prefers-reduced-motion: reduce — движение выключается.
+
+   РАЗМЕТКА (js/status-wiki.js), под которую всё сделано:
+     .sw
+       .sw-toolbar > label.sw-search (svg + input), .sw-filters
+                      > button.sw-chip(.is-active), span.sw-count
+       .sw-grid > article.sw-card(.sw-card--buff|--debuff|--hidden)
+         .sw-card__top > span(индекс) + span.sw-card__name
+                        + span.sw-card__ru
+         .sw-card__badges > span.sw-badge(.sw-badge--level|--stack|--hidden)
+         p.sw-card__desc
+         .sw-card__meta > .sw-stat > span(подпись) + b(значение)
+       p.sw-empty
+       .sw-modal.sw-hidden(.sw-modal--open)   ← порталится в document.body
+         .sw-modal__card > button.sw-modal__close
+                         + .sw-modal__body > h3.sw-modal__title
+                           (b + span) · p.sw-modal__desc
+                           · .sw-modal__stats > .sw-stat
+                           · p.sw-modal__mech
+
+   ПРО ПОРТАЛ: JS переносит .sw-modal в document.body (предок .tab-panel
+   остаётся с transform после анимации входа, а он ломает position: fixed).
+   Поэтому .sw-modal объявляет набор --sw-* сам (см. SW-05) и ни одно
+   правило модалки не начинается с «.sw …» — только .sw-modal*.
+   ============================================================ */
+
+/* ============================================================
+   SW-00. КОРЕНЬ И ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ
+   ============================================================ */
+
+.sw {
+  /* тайминги и кривые — из v2, с безопасными фолбэками */
+  --sw-ease: var(--v2-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  --sw-t-fast: var(--v2-dur-1, 180ms);
+  --sw-t-mid: var(--v2-dur-2, 300ms);
+  --sw-t-slow: var(--v2-dur-3, 560ms);
+  --sw-radius: var(--v2-radius, 2px);
+  --sw-focus: var(--v2-focus, var(--red-2));
+  --sw-gap: 16px;
+
+  position: relative;
+  display: block;
+  margin: 4px 0 72px;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* утилита скрытия — используется и карточками, и модалкой */
+.sw-hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   SW-01. ТУЛБАР: ПОИСК · ЧИПЫ · СЧЁТЧИК
+   ============================================================ */
+
+.sw-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+/* ---- поле поиска: label-обёртка с лупой и input внутри ---- */
+
+.sw-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--sw-radius);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--text) 3%, transparent), transparent),
+    var(--panel);
+  color: var(--text);
+  cursor: text;
+  transition: border-color var(--sw-t-fast) ease, background-color var(--sw-t-fast) ease;
+}
+
+.sw-search svg {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: var(--dim);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transition: stroke var(--sw-t-fast) ease;
+}
+
+.sw-search:hover {
+  border-color: color-mix(in srgb, var(--text) 26%, var(--line));
+}
+
+.sw-search:focus-within {
+  border-color: color-mix(in srgb, var(--red) 55%, var(--line));
+  outline: 2px solid var(--sw-focus);
+  outline-offset: 2px;
+}
+
+.sw-search:focus-within svg {
+  stroke: var(--red-2);
+}
+
+.sw-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* фокус-ринг даёт сама обёртка, чтобы он не «двоился» */
+.sw-search input:focus,
+.sw-search input:focus-visible {
+  outline: none;
+}
+
+.sw-search input::placeholder {
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.sw-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 9px;
+  height: 9px;
+  margin-left: 4px;
+  background: var(--dim);
+  -webkit-mask-image: linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%);
+  mask-image: linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%);
+  cursor: pointer;
+}
+
+.sw-search input::-webkit-search-cancel-button:hover {
+  background: var(--text);
+}
+
+/* ---- чипы фильтров ---- */
+
+.sw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sw-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--sw-radius);
+  background: color-mix(in srgb, var(--text) 2.5%, transparent);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: color var(--sw-t-fast) ease, border-color var(--sw-t-fast) ease,
+    background-color var(--sw-t-fast) ease;
+}
+
+.sw-chip:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--text) 28%, var(--line));
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.sw-chip:focus-visible {
+  outline: 2px solid var(--sw-focus);
+  outline-offset: 2px;
+}
+
+/* активный фильтр — «красный штамп» сайта */
+.sw-chip.is-active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--red) 62%, var(--line));
+  background: color-mix(in srgb, var(--red) 13%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--red) 70%, transparent);
+}
+
+.sw-chip.is-active:hover {
+  background: color-mix(in srgb, var(--red) 19%, transparent);
+}
+
+/* ---- счётчик «ПОКАЗАНО X / 41» ---- */
+
+.sw-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.sw-count b,
+.sw-count strong {
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* ---- строка источника: откуда снимок данных ---- */
+
+.sw-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin: 10px 0 18px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.sw-source__label {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--sw-radius);
+  color: var(--muted);
+}
+
+.sw-source__value {
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.sw-source__link {
+  color: var(--red-2, var(--red));
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--red) 45%, transparent);
+  transition: color var(--sw-t-fast) ease, border-color var(--sw-t-fast) ease;
+}
+
+.sw-source__link:hover,
+.sw-source__link:focus-visible {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.sw-source__link:focus-visible {
+  outline: 2px solid var(--sw-focus);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   SW-02. СЕТКА КАРТОЧЕК
+   ============================================================ */
+
+.sw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sw-gap);
+  align-items: stretch;
+}
+
+/* если пустое состояние окажется внутри сетки — на всю ширину */
+.sw-grid > .sw-empty {
+  grid-column: 1 / -1;
+}
+
+/* ============================================================
+   SW-03. КАРТОЧКА СТАТУСА — «АРХИВНАЯ КАРТА»
+   ============================================================ */
+
+.sw-card {
+  /* игровой TooltipColor приходит inline: style="--sw-color:rgb(...)" */
+  --sw-accent: var(--sw-color, var(--red));
+  --sw-kind: var(--green);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 15px 16px 13px 18px;
+  text-align: left;
+  color: var(--text);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--sw-accent) 9%, transparent), transparent 46%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--sw-radius);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  transition: transform var(--sw-t-mid) var(--sw-ease), border-color var(--sw-t-mid) ease,
+    box-shadow var(--sw-t-mid) ease;
+}
+
+/* акцентная планка по левому краю — цвет эффекта в игре */
+.sw-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    var(--sw-accent) 0%,
+    color-mix(in srgb, var(--sw-accent) 55%, transparent) 46%,
+    transparent 100%
+  );
+  opacity: 0.9;
+  pointer-events: none;
+  transition: opacity var(--sw-t-mid) ease;
+}
+
+/* скан-линии досье — статичный слой под контентом */
+.sw-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.035) 0,
+    rgba(255, 255, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity var(--sw-t-mid) ease;
+}
+
+.sw-card:hover {
+  border-color: color-mix(in srgb, var(--sw-accent) 45%, var(--line));
+  box-shadow:
+    0 22px 48px -28px color-mix(in srgb, var(--sw-accent) 62%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--sw-accent) 14%, transparent);
+}
+
+.sw-card:hover::before {
+  opacity: 1;
+}
+
+.sw-card:hover::after {
+  opacity: 0.8;
+}
+
+.sw-card:focus-visible {
+  outline: 2px solid var(--sw-focus);
+  outline-offset: 3px;
+  border-color: color-mix(in srgb, var(--sw-accent) 55%, var(--line));
+}
+
+/* подъём — только там, где есть настоящий курсор */
+@media (hover: hover) and (pointer: fine) {
+  .sw-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .sw-card:hover .sw-card__name {
+    text-shadow: 0 0 20px color-mix(in srgb, var(--sw-accent) 55%, transparent);
+  }
+}
+
+/* ---- тип эффекта: бафф / дебафф / скрытый ---- */
+
+.sw-card--buff {
+  --sw-kind: var(--green);
+}
+
+.sw-card--debuff {
+  --sw-kind: var(--red-2);
+}
+
+/* скрытый из UI: приглушённый акцент + «зачёркнутая» рамка */
+.sw-card--hidden {
+  --sw-accent: color-mix(in srgb, var(--sw-color, var(--red)) 42%, var(--dim));
+  border-style: dashed;
+  border-left-style: solid;
+}
+
+.sw-card--hidden .sw-card__desc {
+  color: color-mix(in srgb, var(--muted) 76%, var(--dim));
+}
+
+.sw-card--hidden .sw-card__name {
+  color: color-mix(in srgb, var(--text) 84%, var(--dim));
+}
+
+/* ---- верхняя строка: [индекс] НАЗВАНИЕ / русское имя ---- */
+
+.sw-card__top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 3px 9px;
+  min-width: 0;
+}
+
+/* индекс дела — единственный потомок без класса */
+.sw-card__top > span:first-child {
+  grid-row: 1;
+  grid-column: 1;
+  align-self: center;
+  padding: 1px 4px;
+  border: 1px solid color-mix(in srgb, var(--sw-accent) 42%, var(--line));
+  border-radius: 1px;
+  color: color-mix(in srgb, var(--sw-accent) 55%, var(--text));
+  background: color-mix(in srgb, var(--sw-accent) 8%, transparent);
+  font-family: var(--font-mono);
+  font-size: 7px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sw-card__name {
+  grid-row: 1;
+  grid-column: 2;
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 18.5px;
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  transition: color var(--sw-t-fast) ease, text-shadow var(--sw-t-fast) ease;
+}
+
+/* маркер типа перед именем: ромб, зелёный = бафф, красный = дебафф */
+.sw-card__name::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  vertical-align: 0.14em;
+  background: var(--sw-kind);
+  transform: rotate(45deg);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--sw-kind) 65%, transparent);
+}
+
+.sw-card__ru {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.5;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- бейджи: уровень · стак · скрыт ---- */
+
+.sw-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 1px;
+}
+
+.sw-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* уровень — акцентом эффекта */
+.sw-badge--level {
+  color: color-mix(in srgb, var(--sw-accent) 52%, var(--text));
+  border-color: color-mix(in srgb, var(--sw-accent) 40%, var(--line));
+  background: color-mix(in srgb, var(--sw-accent) 12%, transparent);
+}
+
+/* складывается по уровням — латунь */
+.sw-badge--stack {
+  color: var(--gold);
+  border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+/* скрыт из интерфейса игры */
+.sw-badge--hidden {
+  color: var(--dim);
+  border-style: dashed;
+  letter-spacing: 0.16em;
+  background: transparent;
+}
+
+/* ---- описание ---- */
+
+.sw-card__desc {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.62;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* ---- низ карточки: длительность · уровень · стак ---- */
+
+.sw-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 16px;
+  margin-top: auto;
+  padding-top: 9px;
+  border-top: 1px dashed color-mix(in srgb, var(--line) 88%, transparent);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.sw-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sw-stat > span {
+  color: var(--dim);
+}
+
+.sw-stat b {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   SW-04. ПУСТОЕ СОСТОЯНИЕ / СООБЩЕНИЕ ОБ ОШИБКЕ
+   ============================================================ */
+
+.sw-empty {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 52px 24px;
+  border: 1px dashed var(--line);
+  border-radius: var(--sw-radius);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--text) 2.5%, transparent) 0 6px,
+      transparent 6px 13px
+    ),
+    var(--panel);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.75;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.sw-empty::before {
+  content: "∅";
+  display: block;
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: color-mix(in srgb, var(--red) 60%, var(--dim));
+}
+
+.sw-empty b {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.sw-empty span {
+  display: block;
+  max-width: 60ch;
+  color: var(--muted);
+}
+
+/* ============================================================
+   SW-05. МОДАЛКА ДЕТАЛЕЙ
+   ============================================================ */
+
+.sw-modal {
+  /* ВАЖНО: модалку JS переносит порталом в document.body (трансформированный
+     предок .tab-panel ломает position: fixed). Поэтому .sw-modal больше не
+     наследует токены от .sw и объявляет их сам — значения те же, что выше. */
+  --sw-ease: var(--v2-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  --sw-t-fast: var(--v2-dur-1, 180ms);
+  --sw-t-mid: var(--v2-dur-2, 300ms);
+  --sw-t-slow: var(--v2-dur-3, 560ms);
+  --sw-radius: var(--v2-radius, 2px);
+  --sw-focus: var(--v2-focus, var(--red-2));
+  --sw-gap: 16px;
+
+  /* то, что раньше приходило от .sw как обычное наследование */
+  color: var(--text);
+  font-family: var(--font-body);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3.5vw, 40px);
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 40%,
+    rgba(20, 8, 10, 0.72),
+    rgba(3, 3, 5, 0.92)
+  );
+  -webkit-backdrop-filter: blur(12px) saturate(0.9);
+  backdrop-filter: blur(12px) saturate(0.9);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--sw-t-mid) ease, visibility var(--sw-t-mid) ease;
+}
+
+.sw-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sw-modal__card {
+  /* цвет эффекта JS ставит и на карточку модалки */
+  --sw-accent: var(--sw-color, var(--red));
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(660px, 100%);
+  max-height: min(86vh, 820px);
+  max-height: min(86dvh, 820px);
+  margin: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 2px solid color-mix(in srgb, var(--sw-accent) 68%, var(--line));
+  border-radius: var(--sw-radius);
+  box-shadow: 0 40px 110px -46px rgba(0, 0, 0, 0.95);
+  overflow: hidden;
+  transform: translateY(18px) scale(0.985);
+  transition: transform var(--sw-t-slow) var(--sw-ease);
+}
+
+.sw-modal--open .sw-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+.sw-modal__card:focus {
+  outline: none;
+}
+
+.sw-modal__card:focus-visible {
+  outline: 2px solid var(--sw-focus);
+  outline-offset: 4px;
+}
+
+/* ---- тело со скроллом в стиле сайта ---- */
+
+.sw-modal__body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: clamp(20px, 3vw, 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.sw-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sw-modal__body::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+.sw-modal__body::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.sw-modal__body::-webkit-scrollbar-thumb:hover {
+  background: var(--red);
+  background-clip: padding-box;
+}
+
+/* ---- закрыть ---- */
+
+.sw-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--sw-radius);
+  background: color-mix(in srgb, var(--panel) 86%, transparent);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--sw-t-fast) ease, border-color var(--sw-t-fast) ease,
+    background-color var(--sw-t-fast) ease;
+}
+
+.sw-modal__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sw-modal__close:hover {
+  color: var(--text);
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 18%, transparent);
+}
+
+.sw-modal__close:focus-visible {
+  outline: 2px solid var(--sw-focus);
+  outline-offset: 2px;
+}
+
+/* ---- контент ---- */
+
+/* h3 = <b>имя</b><span>русское имя</span> */
+.sw-modal__title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 46px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4.4vw, 38px);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text);
+}
+
+.sw-modal__title b {
+  font: inherit;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.sw-modal__title span {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sw-modal__desc {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+/* «таблица досье»: длительность · уровень · стак · тип */
+.sw-modal__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 1px;
+  margin: 20px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--sw-radius);
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.sw-modal__stats .sw-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--panel);
+  white-space: normal;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.sw-modal__stats .sw-stat b {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+/* техническая суть эффекта — врезка с акцентом */
+.sw-modal__mech {
+  margin: 18px 0 0;
+  padding: 14px 16px 14px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--sw-accent) 60%, var(--line));
+  background: color-mix(in srgb, var(--sw-accent) 6%, transparent);
+  font-size: 13px;
+  line-height: 1.72;
+  color: color-mix(in srgb, var(--text) 74%, var(--muted));
+}
+
+.sw-modal__mech b,
+.sw-modal__mech strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ============================================================
+   SW-06. АДАПТИВ
+   ============================================================ */
+
+/* --- ≥1440: просторнее --- */
+@media (min-width: 1440px) {
+  .sw {
+    --sw-gap: 20px;
+  }
+
+  .sw-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .sw-card {
+    padding: 17px 18px 15px 20px;
+  }
+
+  .sw-card__name {
+    font-size: 19.5px;
+  }
+
+  .sw-card__desc {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+}
+
+/* --- ≤1024: сетка плотнее --- */
+@media (max-width: 1024px) {
+  .sw {
+    --sw-gap: 14px;
+  }
+
+  .sw-search {
+    flex: 1 1 180px;
+  }
+}
+
+/* --- ≤768: поиск на всю строку, карточки компактнее --- */
+@media (max-width: 768px) {
+  .sw {
+    margin-bottom: 56px;
+  }
+
+  .sw-toolbar {
+    gap: 10px;
+  }
+
+  .sw-search {
+    flex: 1 1 100%;
+    order: -1;
+  }
+
+  .sw-filters {
+    flex: 1 1 100%;
+  }
+
+  .sw-count {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sw-grid {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+
+  .sw-card {
+    padding: 14px 14px 12px 16px;
+    gap: 7px;
+  }
+
+  .sw-card__name {
+    font-size: 17.5px;
+  }
+
+  .sw-card__desc {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .sw-modal {
+    padding: 14px;
+  }
+
+  .sw-modal__card {
+    max-height: 88vh;
+    max-height: 88dvh;
+  }
+}
+
+/* --- ≤480: одна колонка, тулбар в столбик (в т.ч. 360) --- */
+@media (max-width: 480px) {
+  .sw-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .sw-search {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+  }
+
+  .sw-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .sw-chip {
+    padding: 8px 6px;
+    letter-spacing: 0.14em;
+  }
+
+  .sw-count {
+    margin-left: 0;
+    text-align: left;
+    letter-spacing: 0.16em;
+  }
+
+  .sw-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sw-card {
+    padding: 13px 13px 11px 15px;
+  }
+
+  .sw-card::before {
+    width: 2px;
+  }
+
+  .sw-card__name {
+    font-size: 17px;
+  }
+
+  .sw-card__desc {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+
+  .sw-empty {
+    padding: 40px 18px;
+    font-size: 11px;
+  }
+
+  .sw-modal {
+    align-items: flex-start;
+    padding: 10px;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .sw-modal__card {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    margin: 0;
+    transform: translateY(12px);
+  }
+
+  .sw-modal__body {
+    padding: 18px 16px 20px;
+  }
+
+  .sw-modal__title {
+    margin-right: 44px;
+    font-size: 25px;
+  }
+
+  .sw-modal__desc {
+    font-size: 13.5px;
+  }
+
+  .sw-modal__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- ≤360: совсем узкий экран --- */
+@media (max-width: 360px) {
+  .sw-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .sw-card {
+    padding: 12px 12px 10px 14px;
+  }
+
+  .sw-card__top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .sw-card__top > span:first-child {
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .sw-card__name {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .sw-card__ru {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  .sw-card__badges {
+    justify-content: flex-start;
+  }
+
+  .sw-stat {
+    gap: 4px;
+  }
+
+  .sw-modal__stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- низкий экран: модалка не «прыгает» по центру --- */
+@media (max-height: 560px) {
+  .sw-modal {
+    align-items: flex-start;
+  }
+
+  .sw-modal__card {
+    margin: 0 auto;
+  }
+}
+
+/* ============================================================
+   SW-07. СВЕТЛАЯ ТЕМА «РАССЕКРЕЧЕННЫЙ АРХИВ»
+   Токены --bg/--panel/--text/--line уже переопределены в v2.css;
+   здесь — только то, что задано полупрозрачными литералами.
+   ============================================================ */
+
+@media (prefers-color-scheme: light) {
+  .sw-card::after {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(43, 36, 28, 0.05) 0,
+      rgba(43, 36, 28, 0.05) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  }
+
+  .sw-card {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--sw-accent) 9%, transparent), transparent 46%),
+      var(--panel);
+  }
+
+  /* на светлой бумаге бледные игровые цвета надо «затемнить» */
+  .sw-badge--level {
+    color: color-mix(in srgb, var(--sw-accent) 26%, var(--text) 74%);
+    border-color: color-mix(in srgb, var(--sw-accent) 34%, var(--line));
+    background: color-mix(in srgb, var(--sw-accent) 9%, transparent);
+  }
+
+  .sw-card__top > span:first-child {
+    color: color-mix(in srgb, var(--sw-accent) 34%, var(--text) 66%);
+  }
+
+  .sw-badge--stack {
+    color: var(--gold);
+    border-color: color-mix(in srgb, var(--gold) 46%, var(--line));
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
+  }
+
+  /* у бледных акцентов (rgb(240,240,240)) ромб иначе исчезает */
+  .sw-card__name::before {
+    box-shadow:
+      0 0 9px color-mix(in srgb, var(--sw-kind) 45%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--text) 30%, transparent);
+  }
+
+  .sw-card:hover {
+    box-shadow:
+      0 20px 42px -30px color-mix(in srgb, var(--sw-accent) 55%, rgba(60, 45, 20, 0.6)),
+      inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent);
+  }
+
+  .sw-search {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent),
+      var(--panel);
+  }
+
+  .sw-empty {
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        rgba(43, 36, 28, 0.045) 0 6px,
+        transparent 6px 13px
+      ),
+      var(--panel);
+  }
+
+  .sw-modal {
+    background: radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      rgba(60, 45, 20, 0.58),
+      rgba(30, 24, 14, 0.88)
+    );
+  }
+
+  .sw-modal__card {
+    box-shadow: 0 30px 80px -44px rgba(60, 45, 20, 0.8);
+  }
+
+  .sw-modal__close {
+    background: color-mix(in srgb, var(--panel-2) 90%, transparent);
+  }
+
+  .sw-modal__body::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--line-soft) 70%, transparent);
+  }
+
+  .sw-modal__body::-webkit-scrollbar-thumb {
+    background: var(--line);
+  }
+
+  .sw-modal__body::-webkit-scrollbar-thumb:hover {
+    background: var(--red);
+  }
+}
+
+/* ============================================================
+   SW-08. PREFERS-REDUCED-MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-card,
+  .sw-card::before,
+  .sw-card::after,
+  .sw-chip,
+  .sw-search,
+  .sw-empty,
+  .sw-modal,
+  .sw-modal__card,
+  .sw-modal__close {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .sw-card:hover {
+    transform: none !important;
+  }
+
+  .sw-modal__card {
+    transform: none !important;
+  }
+
+  .sw-modal__body {
+    scroll-behavior: auto;
+  }
+}

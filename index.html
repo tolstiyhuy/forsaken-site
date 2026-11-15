@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=10">
+  <link rel="stylesheet" href="css/style.css?v=12">
   <!-- SHARED-HEAD:B — Chat 2 (визуал). Пиши ТОЛЬКО между своими маркерами. Одна строка = <link> или <meta>. -->
-  <link rel="stylesheet" href="css/v2.css?v=10">
+  <link rel="stylesheet" href="css/v2.css?v=12">
   <meta name="theme-color" content="#070708" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#e8ddc7" media="(prefers-color-scheme: light)">
   <meta property="og:type" content="website">
@@ -29,7 +29,8 @@
   <meta name="twitter:image" content="assets/og-cover.png">
   <!-- /SHARED-HEAD:B -->
   <!-- SHARED-HEAD:C — Chat 3 (фичи). Пиши ТОЛЬКО между своими маркерами. Одна строка = <script> или <link>. -->
-  <link rel="stylesheet" href="css/features.css?v=10">
+  <link rel="stylesheet" href="css/features.css?v=12">
+  <link rel="stylesheet" href="css/status-wiki.css?v=12">
   <!-- /SHARED-HEAD:C -->
 </head>
 <body class="is-loading">
@@ -693,7 +694,7 @@
           <div class="page-head__meta">
             <span><b>06</b> разделов</span>
             <span><b>R15</b> управление</span>
-            <span><b>1</b> жизнь</span>
+            <span><b>41</b> статус-эффект</span>
           </div>
         </div>
       </div>
@@ -736,7 +737,7 @@
             <article class="mech reveal">
               <div class="mech__num">02</div>
               <h3>Terror Radius</h3>
-              <p>У каждого убийцы свой радиус ужаса. Чем ближе он подходит, тем интенсивнее музыка и громче сердцебиение. Это твой главный радар — слушай, а не смотри.</p>
+              <p>У каждого убийцы свой радиус ужаса. Чем ближе он подходит, тем интенсивнее музыка и громче сердцебиение. Радиус ужаса молчит, если убийца под Undetectable, а выживший под Oblivious, Deafened или Silenced просто не слышит его.</p>
               <ul>
                 <li>Радиус зависит от персонажа</li>
                 <li>Chase-тема включается на близкой дистанции</li>
@@ -758,7 +759,7 @@
             <article class="mech reveal">
               <div class="mech__num">04</div>
               <h3>Статусы</h3>
-              <p>Эффекты складываются в уровни. Один и тот же дебафф может как замедлить, так и полностью выдать тебя убийце.</p>
+              <p>Эффекты складываются в уровни, и почти все упираются в конкретные числа: Slowness −10% скорости за уровень, Resistance −20% входящего урона. Полный разбор всех 41 эффекта — ниже, в вики.</p>
               <div class="status-list">
                 <span class="status status--bad">Corrupted</span>
                 <span class="status status--bad">Slowness</span>
@@ -797,27 +798,12 @@
           </div>
 
           <div class="section-head section-head--small reveal">
-            <div class="section-head__index">07 <span>/</span> СПРАВОЧНИК</div>
-            <h2 class="section-head__title">Статусы и <span>эффекты</span></h2>
-            <p class="section-head__text">Короткая шпаргалка по тому, что именно на тебе висит и откуда это взялось.</p>
+            <div class="section-head__index">07 <span>/</span> ВИКИ БОЕВЫХ ЭФФЕКТОВ</div>
+            <h2 class="section-head__title">Все <span>статус-эффекты</span></h2>
+            <p class="section-head__text">Полный список из боевой системы: 41 эффект с длительностью, максимальным уровнем и механикой. Данные сверены с Roblox Studio; источники наложения указаны только там, где они подтверждены.</p>
           </div>
 
-          <div class="status-table-wrap reveal">
-            <table class="status-table">
-              <thead>
-                <tr><th>СТАТУС</th><th>ТИП</th><th>ЭФФЕКТ</th><th>ИСТОЧНИК</th></tr>
-              </thead>
-              <tbody>
-                <tr><td><span class="status status--bad">Corrupted I</span></td><td>ДЕБАФФ</td><td>Выдаёт ауру и усиливает давление убийцы</td><td>John Doe, ловушки</td></tr>
-                <tr><td><span class="status status--bad">Slowness II</span></td><td>ДЕБАФФ</td><td>Сильно снижает скорость передвижения</td><td>Digital Footprint</td></tr>
-                <tr><td><span class="status status--bad">Bleeding</span></td><td>ДЕБАФФ</td><td>Не даёт полностью восстановить здоровье</td><td>Slasher, ножи</td></tr>
-                <tr><td><span class="status status--good">Speed I</span></td><td>БАФФ</td><td>Кратковременный рывок скорости</td><td>Slash, ловушки, способности</td></tr>
-                <tr><td><span class="status status--good">Invisibility III</span></td><td>БАФФ</td><td>Скрывает силуэт на короткое время</td><td>Two Time, Crouch</td></tr>
-                <tr><td><span class="status status--good">Undetectable I</span></td><td>БАФФ</td><td>Скрывает убийцу от радаров и аур</td><td>Способности убийц</td></tr>
-                <tr><td><span class="status status--good">Resistance</span></td><td>БАФФ</td><td>Сокращает время оглушения и контроль</td><td>Doombringer, предметы</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="sw" id="status-wiki" data-state="ready" aria-label="Вики статус-эффектов"></div>
 
           <div class="section-head section-head--small reveal">
             <div class="section-head__index">08 <span>/</span> FAQ</div>
@@ -831,7 +817,7 @@
             </details>
             <details class="faq__item">
               <summary>Что такое terror radius?</summary>
-              <p>Это радиус ужаса вокруг убийцы. Чем ближе он находится, тем громче музыка и сердцебиение. Радиус зависит от персонажа: у Walker он меньше, у John Doe — больше.</p>
+              <p>Это радиус ужаса вокруг убийцы. Чем ближе он находится, тем громче музыка и сердцебиение. Радиус зависит от персонажа, а статусы вроде Undetectable, Oblivious и Deafened могут полностью его заглушить.</p>
             </details>
             <details class="faq__item">
               <summary>Как работает вторая жизнь Two Time?</summary>
@@ -843,7 +829,7 @@
             </details>
             <details class="faq__item">
               <summary>Почему Admin John Doe такой сильный?</summary>
-              <p>Это административный персонаж-пасхалка. У него огромный запас HP и способность Kill Rush, но в обычной ротации он недоступен и не участвует в честном балансе.</p>
+              <p>Это административный персонаж-пасхалка. В обычной ротации его нет, поэтому в балансе выживших он не участвует.</p>
             </details>
             <details class="faq__item">
               <summary>Где искать актуальные изменения?</summary>
@@ -1243,9 +1229,9 @@
 
         <div class="footer-col footer-col--status">
           <h4>Состояние</h4>
-          <div class="status-line"><i></i> Серверы: онлайн</div>
-          <div class="status-line"><i></i> Версия: 1.0.23</div>
-          <div class="status-line status-line--dev"><i></i> Walker: в разработке</div>
+          <div class="status-line"><i></i> Сайт: статический архив</div>
+          <div class="status-line"><i></i> Данные: сверены в Studio</div>
+          <div class="status-line status-line--dev"><i></i> Онлайн-статус серверов не подключён</div>
           <div class="footer-note">FAN PROJECT · NON-COMMERCIAL</div>
         </div>
       </div>
@@ -1363,11 +1349,13 @@
   <!-- SHARED-BODY:C — Chat 3 (фичи). Новые контейнеры/диалоги только здесь. -->
   <!-- /SHARED-BODY:C -->
 
-  <script src="js/data.js?v=10"></script>
-  <script src="js/details.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
+  <script src="js/data.js?v=12"></script>
+  <script src="js/details.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
   <!-- SHARED-SCRIPTS:C — Chat 3 добавляет свои модули здесь, последними в списке. -->
-  <script src="js/features.js?v=10"></script>
+  <script src="js/features.js?v=12"></script>
+  <script src="js/status-data.js?v=12"></script>
+  <script src="js/status-wiki.js?v=12"></script>
   <!-- /SHARED-SCRIPTS:C -->
 </body>
 </html>
