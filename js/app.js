@@ -1005,6 +1005,16 @@
     if (subEl) subEl.textContent = doc.sub;
     const metaEl = $("#lore-article-meta");
     if (metaEl) metaEl.innerHTML = loreMetaHTML(doc.meta);
+    const articleEl = $("#lore-article");
+    if (articleEl) {
+      articleEl.classList.remove(
+        "lore-article--canon",
+        "lore-article--witness",
+        "lore-article--rumor"
+      );
+      const { level } = splitCredibility(doc.meta);
+      if (level) articleEl.classList.add(`lore-article--${level.cls}`);
+    }
     const footEl = $("#lore-article-foot");
     if (footEl) footEl.textContent = doc.foot;
     const tocFoot = $("#lore-toc-foot");

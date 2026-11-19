@@ -1486,6 +1486,86 @@
   background: none;
 }
 
+/* ---------- достоверность: цвет страницы досье ---------- */
+
+.lore-article {
+  --cred: var(--v2-stamp-red);
+  --cred-ink: #8a2f2a;
+  --cred-line: rgba(138, 47, 42, 0.35);
+  --cred-tint: rgba(138, 47, 42, 0.09);
+}
+
+.lore-article--canon {
+  --cred: #8a6a12;
+  --cred-ink: #6f530d;
+  --cred-line: rgba(138, 106, 18, 0.42);
+  --cred-tint: rgba(138, 106, 18, 0.13);
+}
+
+.lore-article--witness {
+  --cred: #1c3f7a;
+  --cred-ink: #1c3f7a;
+  --cred-line: rgba(28, 63, 122, 0.38);
+  --cred-tint: rgba(28, 63, 122, 0.11);
+}
+
+.lore-article--rumor {
+  --cred: #6d6152;
+  --cred-ink: #6d6152;
+  --cred-line: rgba(109, 97, 82, 0.38);
+  --cred-tint: rgba(109, 97, 82, 0.12);
+}
+
+/* страница целиком: тонировка бумаги, цветная кромка-корешок и рамка */
+.lore-article {
+  border-color: var(--cred-line);
+  border-left: 5px solid var(--cred);
+  box-shadow: var(--v2-shadow-paper), inset 0 0 0 9999px var(--cred-tint);
+}
+
+/* цветная кромка в шапке дела */
+.lore-article .lore-article__head {
+  border-top: 3px solid var(--cred);
+}
+
+.lore-article .lore-article__file {
+  color: var(--cred-ink);
+}
+
+/* «строки»: поле-линейка, разделители глав, номера и колонтитул */
+.lore-article::before {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--cred-line) 12%,
+    var(--cred-line) 88%,
+    transparent
+  );
+}
+
+.lore-article .lore-chapter + .lore-chapter {
+  border-top-color: var(--cred-line);
+}
+
+.lore-article .lore-chapter__num {
+  color: var(--cred);
+  opacity: 0.5;
+}
+
+.lore-article .lore-chapter__kicker {
+  color: var(--cred-ink);
+  opacity: 0.85;
+}
+
+.lore-article .lore-chapter:first-child .lore-chapter__text > p:first-child::first-letter {
+  color: var(--cred);
+  text-shadow: 1px 1px 0 var(--cred-line);
+}
+
+.lore-article .lore-article__foot {
+  border-top-color: var(--cred-line);
+}
+
 .v2-legend {
   display: flex;
   flex-wrap: wrap;
