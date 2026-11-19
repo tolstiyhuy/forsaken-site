@@ -29,6 +29,32 @@
 
   const cleanNumber = (n) => (n === null || n === undefined ? "—" : n.toLocaleString("ru-RU"));
 
+  /* ---------- helpers: credibility ---------- */
+
+  const CREDIBILITY_LEVELS = { "КАНОН": "canon", "СВИДЕТЕЛЬСТВО": "witness", "СЛУХ": "rumor" };
+
+  const splitCredibility = (meta) => {
+    const list = Array.isArray(meta) ? meta : [];
+    const items = [];
+    let level = null;
+    list.forEach((raw) => {
+      const value = String(raw).trim();
+      const cls = CREDIBILITY_LEVELS[value];
+      if (cls && !level) {
+        level = { value, cls };
+        return;
+      }
+      items.push(value);
+    });
+    return { level, items };
+  };
+
+  const loreMetaHTML = (meta) => {
+    const { level, items } = splitCredibility(meta);
+    const badge = level ? `<span class="v2-cred v2-cred--${level.cls}">${level.value}</span>` : "";
+    return badge + items.map((m) => `<span>${m}</span>`).join("");
+  };
+
   /* ---------- render: characters ---------- */
 
   const mediaHTML = (char) => {
@@ -229,7 +255,7 @@
       related: ["LR-000", "LR-011"],
       sub: "Он и есть та самая лишняя секунда.",
       fileLabel: "ЛОР-ДОСЬЕ // LR-001",
-      meta: ["13 ГЛАВ", "≈ 25 МИН ЧТЕНИЯ", "СПОЙЛЕРЫ"],
+      meta: ["14 ГЛАВ", "≈ 26 МИН ЧТЕНИЯ", "КАНОН", "СПОЙЛЕРЫ"],
       foot: "Долг всё ещё не закрыт.",
       tocFoot: "ХРОНОС · LR-001",
       download: "Chronos_lore_final.md",
@@ -257,7 +283,7 @@
       related: ["LR-001", "LR-012"],
       sub: "Вечный ад — это не мир. Это счёт, который ведут.",
       fileLabel: "ЛОР-ДОСЬЕ // LR-000",
-      meta: ["9 ГЛАВ", "≈ 18 МИН ЧТЕНИЯ", "СПОЙЛЕРЫ"],
+      meta: ["10 ГЛАВ", "≈ 19 МИН ЧТЕНИЯ", "КАНОН", "СПОЙЛЕРЫ"],
       foot: "Счёт всё ещё открыт.",
       tocFoot: "МЕСТО · LR-000",
       download: "Place_lore_final.md"
@@ -978,7 +1004,7 @@
     const subEl = $("#lore-article-sub");
     if (subEl) subEl.textContent = doc.sub;
     const metaEl = $("#lore-article-meta");
-    if (metaEl) metaEl.innerHTML = doc.meta.map((m) => `<span>${m}</span>`).join("");
+    if (metaEl) metaEl.innerHTML = loreMetaHTML(doc.meta);
     const footEl = $("#lore-article-foot");
     if (footEl) footEl.textContent = doc.foot;
     const tocFoot = $("#lore-toc-foot");
