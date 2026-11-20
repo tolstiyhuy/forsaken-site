@@ -880,6 +880,8 @@
   line-height: 1.15;
   letter-spacing: 0.02em;
   color: var(--text);
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* техническая суть эффекта — врезка с акцентом */
