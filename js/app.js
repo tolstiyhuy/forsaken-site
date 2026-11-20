@@ -273,6 +273,15 @@
         { id: "chetvertye", kicker: "ГЛАВА 11", title: "Четыре единицы", from: 61, to: 66 },
         { id: "slasher", kicker: "ГЛАВА 12", title: "Те, кто платят вперёд", from: 67, to: 78 },
         { id: "tishina", kicker: "ЭПИЛОГ", title: "Тишина без тика", from: 79, to: 89 }
+      ],
+      beatsSub: "ОДНА НОЧЬ, КОТОРАЯ СОЗДАЛА УБИЙЦУ",
+      beats: [
+        { t: "ДОЛГ", p: "Годами заброшенный код в штабе Roblox копится и однажды начинает хотеть." },
+        { t: "ОБРЯД", p: "Amarah превращает старую метку администраторов в выдуманного бога Спауна." },
+        { t: "ЖЕРТВА", p: "Two Time убивает Azure на поле ночной красавицы, чтобы тот вернулся." },
+        { t: "ОШИБКА", p: "Спаун молчит. Пластина под полем срабатывает сама и возвращает культиста к жизни." },
+        { t: "РОЖДЕНИЕ", p: "Из зазора между двумя ударами сердца выходит человек с циферблатом вместо лица." },
+        { t: "СЧЁТ", p: "Девять старейшин платят по секунде. Долг Amarah остаётся висеть на границе леса." }
       ]
     },
     place: {
@@ -534,6 +543,11 @@
               : Array.isArray(raw.chapters)
                 ? raw.chapters
                 : null,
+          beatsSub: raw.beatsSub || "",
+          beats:
+            Array.isArray(raw.beats) && raw.beats.length
+              ? raw.beats.filter((b) => b && b.t && b.p)
+              : null,
           planned: false
         };
         if (raw.requires) gateSeeds.push({ id: raw.id, requires: raw.requires });
@@ -996,6 +1010,26 @@
     });
   };
 
+  /* ХРОНОЛОГИЯ под читалкой: у каждого досье своя лента событий из manifest.json (beats).
+     Если у записи beats нет — секция прячется, чтобы не показывать чужую хронологию. */
+  const paintLoreBeats = (doc) => {
+    const wrap = $("#lore-beats");
+    if (!wrap) return;
+    const beats = doc && Array.isArray(doc.beats) ? doc.beats.filter((b) => b && b.t && b.p) : [];
+    const list = $("#lore-beats-list");
+    if (list) {
+      list.innerHTML = beats
+        .map(
+          (b, i) =>
+            `<li><span>${String(i + 1).padStart(2, "0")}</span><b>${b.t}</b><p>${b.p}</p></li>`
+        )
+        .join("");
+    }
+    const sub = $("#lore-beats-sub");
+    if (sub) sub.textContent = (doc && doc.beatsSub) || "";
+    wrap.hidden = !beats.length;
+  };
+
   const paintLoreChrome = (doc) => {
     const fileEl = $("#lore-article-file");
     if (fileEl) fileEl.textContent = doc.fileLabel;
@@ -1025,6 +1059,10 @@
       dl.href = doc.file;
       dl.download = doc.download;
     }
+    paintLoreBeats(doc);
+    /* блок «Персонажи в этой истории» написан про Хроноса — показываем только его досье */
+    const linksEl = $("#lore-links");
+    if (linksEl) linksEl.hidden = doc.record !== "LR-001";
   };
 
   const markLoreRead = (key) => {
@@ -1079,6 +1117,7 @@
     if (foot) foot.textContent = "Запись закрыта до прочтения предыдущего досье.";
 
     paintLoreRelated(null);
+    paintLoreBeats(null);
 
     content.innerHTML = `
       <div class="lore-gate">

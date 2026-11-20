@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=14">
+  <link rel="stylesheet" href="css/style.css?v=15">
   <!-- SHARED-HEAD:B — Chat 2 (визуал). Пиши ТОЛЬКО между своими маркерами. Одна строка = <link> или <meta>. -->
-  <link rel="stylesheet" href="css/v2.css?v=14">
+  <link rel="stylesheet" href="css/v2.css?v=15">
   <meta name="theme-color" content="#070708" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#e8ddc7" media="(prefers-color-scheme: light)">
   <meta property="og:type" content="website">
@@ -30,8 +30,8 @@
   <meta name="twitter:image" content="https://tolstiyhuy.github.io/forsaken-site/assets/og-cover.png">
   <!-- /SHARED-HEAD:B -->
   <!-- SHARED-HEAD:C — Chat 3 (фичи). Пиши ТОЛЬКО между своими маркерами. Одна строка = <script> или <link>. -->
-  <link rel="stylesheet" href="css/features.css?v=14">
-  <link rel="stylesheet" href="css/status-wiki.css?v=14">
+  <link rel="stylesheet" href="css/features.css?v=15">
+  <link rel="stylesheet" href="css/status-wiki.css?v=15">
   <!-- /SHARED-HEAD:C -->
 </head>
 <body class="is-loading">
@@ -1036,22 +1036,15 @@
             </article>
           </div>
 
-          <div class="lore-beats reveal" data-lore-only="characters">
+          <div class="lore-beats reveal" data-lore-only="characters" id="lore-beats" hidden>
             <div class="lore-beats__head">
               <span>ХРОНОЛОГИЯ</span>
-              <b>ОДНА НОЧЬ, КОТОРАЯ СОЗДАЛА УБИЙЦУ</b>
+              <b id="lore-beats-sub"></b>
             </div>
-            <ol>
-              <li><span>01</span><b>ДОЛГ</b><p>Годами заброшенный код в штабе Roblox копится и однажды начинает хотеть.</p></li>
-              <li><span>02</span><b>ОБРЯД</b><p>Amarah превращает старую метку администраторов в выдуманного бога Спауна.</p></li>
-              <li><span>03</span><b>ЖЕРТВА</b><p>Two Time убивает Azure на поле ночной красавицы, чтобы тот вернулся.</p></li>
-              <li><span>04</span><b>ОШИБКА</b><p>Спаун молчит. Пластина под полем срабатывает сама и возвращает культиста к жизни.</p></li>
-              <li><span>05</span><b>РОЖДЕНИЕ</b><p>Из зазора между двумя ударами сердца выходит человек с циферблатом вместо лица.</p></li>
-              <li><span>06</span><b>СЧЁТ</b><p>Девять старейшин платят по секунде. Долг Amarah остаётся висеть на границе леса.</p></li>
-            </ol>
+            <ol id="lore-beats-list"></ol>
           </div>
 
-          <section class="lore-links" data-lore-only="characters">
+          <section class="lore-links" data-lore-only="characters" id="lore-links" hidden>
             <div class="section-head reveal">
               <div class="section-head__kicker"><i></i> СВЯЗИ</div>
               <h2>Персонажи в этой истории</h2>
@@ -1351,13 +1344,13 @@
   <!-- SHARED-BODY:C — Chat 3 (фичи). Новые контейнеры/диалоги только здесь. -->
   <!-- /SHARED-BODY:C -->
 
-  <script src="js/data.js?v=14"></script>
-  <script src="js/details.js?v=14"></script>
-  <script src="js/app.js?v=14"></script>
+  <script src="js/data.js?v=15"></script>
+  <script src="js/details.js?v=15"></script>
+  <script src="js/app.js?v=15"></script>
   <!-- SHARED-SCRIPTS:C — Chat 3 добавляет свои модули здесь, последними в списке. -->
-  <script src="js/features.js?v=14"></script>
-  <script src="js/status-data.js?v=14"></script>
-  <script src="js/status-wiki.js?v=14"></script>
+  <script src="js/features.js?v=15"></script>
+  <script src="js/status-data.js?v=15"></script>
+  <script src="js/status-wiki.js?v=15"></script>
   <!-- /SHARED-SCRIPTS:C -->
 </body>
 </html>
