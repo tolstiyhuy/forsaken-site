@@ -778,12 +778,17 @@
       el.hidden = el.dataset.loreOnly !== cat;
     });
 
-    const reader = $(".lore-reader");
-    if (reader) reader.hidden = cat === "other";
-
     renderLoreArchive();
 
-    if (loadDoc && cat !== "other") renderLoreDoc(cat === "place" ? "place" : "chronos");
+    if (loadDoc) {
+      if (cat === "other") {
+        /* иначе читалка осталась бы с чужим досье — открываем первую готовую служебную запись */
+        const first = LORE_ARCHIVE.find((e) => e.cat === "other" && e.doc);
+        if (first) renderLoreDoc(first.doc);
+      } else {
+        renderLoreDoc(cat === "place" ? "place" : "chronos");
+      }
+    }
   };
 
   let loreToastTimer = null;
@@ -1251,7 +1256,7 @@
     $("#lore-cats")?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-lore-cat]");
       if (!btn) return;
-      setLoreCat(btn.dataset.loreCat, { loadDoc: btn.dataset.loreCat !== "other" });
+      setLoreCat(btn.dataset.loreCat, { loadDoc: true });
     });
 
     $("#tab-lore")?.addEventListener("click", (e) => {
